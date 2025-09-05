@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info:
+  title: user-manager
+  description: ''
+  license:
+    name: ''
+  version: 0.1.0
+paths:
+  /users:
+    get:
+      tags:
+      - rest::users
+      operationId: get_all
+      responses:
+        '404':
+          description: No users
+  /users/{uid}:
+    get:
+      tags:
+      - rest::users
+      operationId: get
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to query
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      responses:
+        '200':
+          description: Return a single user by its uid
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+- bearerAuth: []

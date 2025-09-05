@@ -1,0 +1,13 @@
+/authorize\
+    ?response_type="code"\
+    &client_id="flecs"\
+    &redirect_uri="http://<ip>:<port>/callback"\
+    &scope="admin"\
+    &state="<any string>"\
+    &code_challenge="<s256>"\
+    &code_challenge_method="s256"
+
+code_verifier=Oy4ldLrvLMjf1yBE3iKm1rGCvqMS87-Y3Y6_IO1I_Feh3iV7
+code_challenge=pckb0mvuhObrV9W1pEJP4RxvH8HU0gTawle6cyji9K0
+
+http://localhost:27000/oauth/authorize?response_type=code&client_id=flecs&redirect_uri=http://localhost:27000/oauth/callback&scope=admin&state=012345abcdef&code_challenge=pckb0mvuhObrV9W1pEJP4RxvH8HU0gTawle6cyji9K0&code_challenge_method=s256
