@@ -1,0 +1,222 @@
+/* Inter Font Import */
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* CSS Variables */
+:root { 
+  --bg: #141826; /* purpleHeart - background */
+  --card: #1a1f30; /* slightly lighter than background for card */
+  --text: #e6eaf2; 
+  --muted: #9aa3b2; 
+  --accent: #73A9CA; /* nordicSky - accent */
+  --primary: #FF2E63; /* tokyoSunset - primary */
+  --secondary: #08D9D6; /* cyberMint - secondary */
+  --danger: #ff5c5c; 
+}
+
+/* Reset and Base Styles */
+* { 
+  box-sizing: border-box;
+}
+
+body { 
+  margin: 0; 
+  min-height: 100svh; 
+  display: grid; 
+  place-items: center; 
+  background: linear-gradient(180deg, #0f1219, var(--bg));
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+}
+
+/* Card Component - Material Design Elevation 8 */
+.card { 
+  background: var(--card); 
+  color: var(--text); 
+  width: min(400px, 92vw); /* MUI standard widths */
+  border-radius: 8px; /* MUI standard: 4px increments */
+  padding: 24px; /* MUI spacing: 8px grid */
+  box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12); /* Material Design elevation 8 */
+}
+
+/* Header and Logo - MUI spacing system */
+.header {
+  text-align: center;
+  margin-bottom: 32px; /* MUI spacing: 8px * 4 */
+}
+
+.logo {
+  width: 48px; /* MUI icon sizing: 24, 32, 48 */
+  height: 48px;
+  margin-bottom: 24px; /* MUI spacing: 8px * 3 */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Typography - MUI Typography Scale */
+h1 { 
+  margin: 0; 
+  font-size: 1.5rem; /* MUI h5 equivalent: 24px */
+  font-weight: 500; /* MUI medium weight */
+  line-height: 1.334; /* MUI line height */
+  letter-spacing: 0em; /* MUI letter spacing */
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif; /* MUI font stack */
+  text-align: center;
+}
+
+label { 
+  display: block; 
+  font-size: 0.75rem; /* MUI caption: 12px */
+  font-weight: 400; /* MUI regular weight */
+  line-height: 1.66; /* MUI line height */
+  letter-spacing: 0.03333em; /* MUI letter spacing */
+  color: var(--muted); 
+  margin-bottom: 8px; /* MUI spacing: 8px * 1 */
+}
+
+/* Form Elements - MUI TextField styling */
+input { 
+  width: 100%; 
+  padding: 16px 14px; /* MUI standard input padding */
+  border-radius: 4px; /* MUI standard border radius */
+  border: 1px solid rgba(255, 255, 255, 0.23); /* MUI outlined variant border */
+  background: transparent; /* MUI outlined inputs are transparent */
+  color: var(--text); 
+  outline: none; 
+  font-size: 1rem; /* MUI body1: 16px */
+  font-weight: 400;
+  line-height: 1.5;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: border-color 0.2s cubic-bezier(0.0, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.0, 0, 0.2, 1); /* MUI transitions */
+}
+
+input:hover {
+  border-color: var(--text); /* MUI hover state */
+}
+
+input:focus { 
+  border-color: var(--accent); 
+  border-width: 2px; /* MUI focus state has thicker border */
+  padding: 15px 13px; /* Adjust padding to compensate for thicker border */
+}
+
+/* Button - MUI contained button */
+button { 
+  width: 100%; 
+  padding: 8px 22px; /* MUI medium button padding */
+  min-height: 36px; /* MUI minimum touch target */
+  border-radius: 4px; /* MUI standard border radius */
+  border: 0; 
+  background: var(--primary); 
+  color: white; 
+  font-size: 0.875rem; /* MUI button font size: 14px */
+  font-weight: 500; /* MUI medium weight */
+  line-height: 1.75; /* MUI button line height */
+  letter-spacing: 0.02857em; /* MUI button letter spacing */
+  text-transform: uppercase; /* MUI buttons are uppercase */
+  cursor: pointer; 
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1); /* MUI transitions */
+  box-shadow: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12); /* MUI elevation 2 */
+}
+
+button:hover {
+  background: color-mix(in srgb, var(--primary) 92%, white); /* MUI hover effect */
+  box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12); /* MUI elevation 4 */
+}
+
+button:active {
+  box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12); /* MUI elevation 8 */
+}
+
+button[disabled] { 
+  background: rgba(255, 255, 255, 0.12); /* MUI disabled background */
+  color: rgba(255, 255, 255, 0.3); /* MUI disabled text */
+  cursor: default;
+  box-shadow: none; /* MUI disabled buttons have no shadow */
+}
+
+/* Layout - MUI spacing system */
+.row { 
+  margin-bottom: 24px; /* MUI spacing: 8px * 3 */
+}
+
+/* Status and Notes - MUI Alert/Snackbar styling */
+.note { 
+  margin-top: 16px; /* MUI spacing: 8px * 2 */
+  font-size: 0.75rem; /* MUI caption: 12px */
+  line-height: 1.66;
+  color: var(--muted); 
+}
+
+#status { 
+  margin-top: 16px; /* MUI spacing: 8px * 2 */
+  padding: 12px 16px; /* MUI alert padding */
+  border-radius: 4px; /* MUI standard border radius */
+  display: none; 
+  font-size: 0.875rem; /* MUI body2: 14px */
+  line-height: 1.43;
+}
+
+#status.ok { 
+  display: block; 
+  background: rgba(76, 175, 80, 0.12); /* MUI success color with alpha */
+  border: 1px solid rgba(76, 175, 80, 0.5); 
+  color: rgb(46, 125, 50); /* MUI success dark */
+}
+
+#status.err { 
+  display: block; 
+  background: rgba(244, 67, 54, 0.12); /* MUI error color with alpha */
+  border: 1px solid rgba(244, 67, 54, 0.5); 
+  color: rgb(198, 40, 40); /* MUI error dark */
+}
+
+/* Code element styling */
+code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Navigation styling for index page */
+.navigation {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.navigation p {
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+
+.nav-button {
+  display: inline-block;
+  padding: 8px 22px;
+  min-height: 36px;
+  border-radius: 4px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.75;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12);
+}
+
+.nav-button:hover {
+  background: color-mix(in srgb, var(--primary) 92%, white);
+  box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
+}

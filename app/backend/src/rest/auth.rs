@@ -1,13 +1,27 @@
-use axum::http::HeaderMap;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::Html;
 use axum::{
-    extract::State,
+    extract::{Json, State, rejection::JsonRejection},
     response::{IntoResponse, Redirect},
 };
 use cookie::Cookie;
+use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
+use crate::model::password::Password;
 use crate::model::session::UserSession;
 use crate::state;
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct LoginRequest {
+    username: String,
+    password: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct LoginResponse {
+    status: String,
+}
 
 #[utoipa::path(
     post,
@@ -20,19 +34,46 @@ use crate::state;
 pub async fn post_login(
     State(state): State<state::AppState>,
     headers: HeaderMap,
+    payload: Result<Json<LoginRequest>, JsonRejection>,
 ) -> impl IntoResponse {
-    /* Query if a login session is available */
-    let login_session = {
-        if let Some(sid) = extract_sid_from_request_headers(&headers) {
-            let mut login_sessions = state.login_sessions.lock().unwrap();
-            login_sessions.take(sid.as_str())
-        } else {
-            None
-        }
+    /* validate payload */
+    if payload.is_err() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json::from(r##"{"reason":"Invalid request body"}"##),
+        ));
+    }
+    let payload = payload.unwrap();
+
+    /* verify username/password */
+    let db = state.db.lock().unwrap();
+    let user = db.users.query_by_name(&payload.username);
+    if user.is_none() {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json::from(r##"{"reason":"Invalid username and/or password"}"##),
+        ));
+    }
+
+    let user = user.unwrap();
+    if let Err(_) = user.password.verify(&payload.password) {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json::from(r##"{"reason":"Invalid username and/or password"}"##),
+        ));
+    }
+
+    /* login successful, remove login session, if any */
+    let mut login_sessions = state.login_sessions.lock().unwrap();
+    let sid = extract_sid_from_request_headers(&headers);
+    let login_session = match sid {
+        Some(s) => login_sessions.take(s.as_str()),
+        None => None,
     };
 
-    /* add username/password check here, determine uid and attach to user_session */
-    let user_session = UserSession::new();
+    /* create new user-session and tie it to the user's uid */
+    /* @todo add granted scope to user session */
+    let user_session = UserSession::new(user.uid.clone());
 
     let cookie = Cookie::build(("sid", user_session.get_sid()))
         .path("/")
@@ -49,11 +90,11 @@ pub async fn post_login(
     user_sessions.insert(user_session);
 
     match login_session {
-        Some(s) => (
+        Some(s) => Ok((
             set_cookie,
             Redirect::to(format!("/oauth/authorize?{}", s.get_q()).as_str()).into_response(),
-        ),
-        None => (set_cookie, Html("Login successful").into_response()),
+        )),
+        None => Ok((set_cookie, Html("Login successful").into_response())),
     }
 }
 

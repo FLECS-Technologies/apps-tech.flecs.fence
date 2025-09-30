@@ -78,10 +78,10 @@ impl Borrow<str> for UserSession {
 }
 
 impl UserSession {
-    pub fn new() -> Self {
+    pub fn new(uid: Uid) -> Self {
         Self {
             sid: new_sid(),
-            uid: Uid::default(),
+            uid: uid,
         }
     }
 
@@ -96,7 +96,7 @@ impl UserSession {
 
 impl Default for UserSession {
     fn default() -> Self {
-        Self::new()
+        Self::new(0)
     }
 }
 
