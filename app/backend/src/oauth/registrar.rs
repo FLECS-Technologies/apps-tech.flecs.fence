@@ -6,17 +6,15 @@ use std::sync::LazyLock;
 use oxide_auth::endpoint::PreGrant;
 use oxide_auth::primitives::prelude::ClientUrl;
 use oxide_auth::primitives::registrar::{
-    Argon2, BoundClient, Client, EncodedClient, IgnoreLocalPortUrl, PasswordPolicy,
-    RegisteredClient, RegisteredUrl, RegistrarError,
+    Argon2, BoundClient, Client, EncodedClient, ExactUrl, PasswordPolicy, RegisteredClient,
+    RegisteredUrl, RegistrarError,
 };
 use oxide_auth::primitives::scope::Scope;
 
 fn make_flecs_client() -> Client {
     Client::public(
         "flecs",
-        RegisteredUrl::IgnorePortOnLocalhost(
-            IgnoreLocalPortUrl::new("http://localhost/oauth/callback").unwrap(),
-        ),
+        RegisteredUrl::Exact(ExactUrl::new("https://*/".into()).unwrap()),
         Scope::from_str("admin").unwrap(),
     )
 }
