@@ -1,14 +1,10 @@
 use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 
-use oxide_auth::frontends::simple::endpoint::Vacant;
-use oxide_auth::primitives::authorizer::AuthMap;
-use oxide_auth::primitives::issuer::TokenMap;
 use oxide_auth::primitives::prelude::RandomGenerator;
-use oxide_auth::primitives::registrar::ClientMap;
 
 use crate::model::session;
-use crate::oauth::endpoint::{Authorizer, Endpoint, Issuer};
+use crate::oauth::endpoint::{Authorizer, Issuer};
 use crate::oauth::registrar::{Registrar, build_registrar};
 use crate::persist;
 

@@ -4,9 +4,9 @@ use axum::{
     extract::State,
     response::{IntoResponse, Redirect},
 };
-use cookie::{Cookie, time};
+use cookie::Cookie;
 
-use crate::model::session::{LoginSession, UserSession};
+use crate::model::session::UserSession;
 use crate::state;
 
 #[utoipa::path(
