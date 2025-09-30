@@ -8,8 +8,8 @@ use oxide_auth::primitives::prelude::RandomGenerator;
 use oxide_auth::primitives::registrar::ClientMap;
 
 use crate::model::session;
-use crate::oauth::endpoint::{Authorizer, Endpoint, Issuer, Registrar};
-use crate::oauth::registrar::build_registrar;
+use crate::oauth::endpoint::{Authorizer, Endpoint, Issuer};
+use crate::oauth::registrar::{Registrar, build_registrar};
 use crate::persist;
 
 #[derive(Clone)]
