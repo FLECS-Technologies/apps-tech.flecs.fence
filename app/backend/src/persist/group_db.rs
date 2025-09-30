@@ -13,3 +13,10 @@ impl GroupDB {
         Ok(GroupDB { path, groups })
     }
 }
+
+impl Drop for GroupDB {
+    fn drop(&mut self) {
+        super::save_to_file(&self.path, &self.groups)
+            .unwrap_or_else(|e| println!("{}", format!("Could not persist group database: {}", e)));
+    }
+}

@@ -13,3 +13,10 @@ impl UserDB {
         Ok(UserDB { path, users })
     }
 }
+
+impl Drop for UserDB {
+    fn drop(&mut self) {
+        super::save_to_file(&self.path, &self.users)
+            .unwrap_or_else(|e| println!("{}", format!("Could not persist user database: {}", e)));
+    }
+}
