@@ -2,13 +2,11 @@ use axum::extract::{RawQuery, State};
 use axum::http::{HeaderMap, header};
 use axum::response::{IntoResponse, Redirect};
 use cookie::{Cookie, time};
-use oxide_auth::endpoint::{Authorizer, OwnerConsent, Solicitation};
+use oxide_auth::endpoint::{OwnerConsent, Solicitation};
 use oxide_auth::frontends::simple::endpoint::{FnSolicitor, Vacant};
 use oxide_auth_axum::OAuthRequest;
 
 use crate::model::session::LoginSession;
-use crate::oauth::endpoint::Endpoint;
-use crate::oauth::solicitor;
 use crate::state::AppState;
 
 pub async fn get_authorize(
