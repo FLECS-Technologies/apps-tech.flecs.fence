@@ -1,0 +1,9 @@
+[
+	{
+		"uid": 0,
+		"name": "admin",
+		"full_name": "Administrator",
+		"password": "$argon2id$v=19$m=65536,t=3,p=2$MDEyMzQ1Njc$AfjJv7FhtClQNpXYiytp1G3ttjonU4aqEspUS+19Zoc"
+	}
+]
+

@@ -2,29 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login</title>
-  <style>
-    :root { --bg:#0b1220; --card:#121a2f; --text:#e6eaf2; --muted:#9aa3b2; --accent:#4d7cff; --danger:#ff5c5c; }
-    * { box-sizing: border-box }
-    body { margin:0; min-height:100svh; display:grid; place-items:center; background:linear-gradient(180deg,#0a0f1e,#0e1324); }
-    .card { background:var(--card); color:var(--text); width:min(420px,92vw); border-radius:16px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,.4); }
-    h1 { margin:0 0 16px; font:600 20px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
-    label { display:block; font-size:14px; color:var(--muted); margin-bottom:6px; }
-    input { width:100%; padding:12px 14px; border-radius:10px; border:1px solid #28324a; background:#0d1426; color:var(--text); outline:none; }
-    input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(77,124,255,.2); }
-    .row { margin-bottom:14px; }
-    button { width:100%; padding:12px 16px; border-radius:12px; border:0; background:var(--accent); color:white; font-weight:600; cursor:pointer; }
-    button[disabled] { opacity:.6; cursor:not-allowed; }
-    .note { margin-top:12px; font-size:12px; color:var(--muted); }
-    #status { margin-top:12px; padding:10px 12px; border-radius:10px; display:none; }
-    #status.ok { display:block; background:rgba(77,124,255,.12); border:1px solid rgba(77,124,255,.4); }
-    #status.err { display:block; background:rgba(255,92,92,.12); border:1px solid rgba(255,92,92,.4); }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="Created with ❤️ by FLECS" />
+  <title>FLECS - Login</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+  <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
   <main class="card">
-    <h1>Sign in</h1>
+    <div class="header">
+      <img src="images/logo.svg" alt="FLECS Logo" class="logo" />
+      <h1>Please sign in to continue</h1>
+    </div>
     <form id="loginForm" autocomplete="on" spellcheck="false">
       <div class="row">
         <label for="username">Username</label>
@@ -35,7 +24,6 @@
         <input id="password" name="password" type="password" required autocomplete="current-password" />
       </div>
       <button id="loginBtn" type="submit">Login</button>
-      <div class="note">We’ll send a JSON POST to <code>/login</code>.</div>
       <div id="status" role="status" aria-live="polite"></div>
     </form>
     <noscript><p class="note">JavaScript is required to submit as JSON.</p></noscript>
@@ -47,10 +35,14 @@
       const btn = document.getElementById('loginBtn');
       const statusEl = document.getElementById('status');
 
-      function showStatus(kind, msg) {
+      function showStatus(kind, msg, isHtml = false) {
         statusEl.className = '';
         statusEl.classList.add(kind === 'ok' ? 'ok' : 'err');
-        statusEl.textContent = msg;
+        if (isHtml) {
+          statusEl.innerHTML = msg;
+        } else {
+          statusEl.textContent = msg;
+        }
       }
 
       form.addEventListener('submit', async (e) => {
@@ -87,7 +79,12 @@
           if (res.ok) {
             showStatus('ok', typeof payload === 'string' ? payload : (payload.message || 'Login successful.'));
           } else {
-            showStatus('err', typeof payload === 'string' ? payload : (payload.error || 'Login failed.'));
+            // Render HTML error responses directly
+            if (typeof payload === 'string' && payload.includes('<html>')) {
+              showStatus('err', payload, true); // Pass true to render as HTML
+            } else {
+              showStatus('err', payload.error || payload.message || 'Login failed. Please try again.');
+            }
           }
         } catch (err) {
           showStatus('err', 'Network error. Please try again.');

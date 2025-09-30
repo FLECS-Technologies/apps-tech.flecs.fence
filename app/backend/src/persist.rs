@@ -12,8 +12,8 @@ use group_db::GroupDB;
 use user_db::UserDB;
 
 pub struct Db {
-    groups: GroupDB,
-    users: UserDB,
+    pub groups: GroupDB,
+    pub users: UserDB,
 }
 
 impl Default for Db {
