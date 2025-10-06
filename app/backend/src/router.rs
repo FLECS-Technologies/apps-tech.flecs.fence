@@ -12,6 +12,10 @@ pub fn build_router() -> Router {
         .route("/", get(|| async { "Hello World!" }))
         .route("/login", post(rest::auth::post_login))
         .route("/users", get(rest::users::get_all))
+        .route(
+            "/users/super-admin",
+            get(rest::users::get_super_admin).post(rest::users::post_super_admin),
+        )
         .route("/users/{uid}", get(rest::users::get))
         .nest("/oauth", crate::oauth::routes::build_router())
         .with_state(state)
