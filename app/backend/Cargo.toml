@@ -20,6 +20,8 @@ url = "2.5.7"
 utoipa = { version = "5.4.0", features = ["axum_extras", "debug", "openapi_extensions", "yaml"] }
 uuid = { version = "1.18.1", features = ["v4"] }
 zeroize = { version = "1.8.1", features = ["derive"] }
+async-signal = "0.2"
+futures-util = "0.3"
 
 [profile.release-with-debug]
 inherits = "release"

@@ -1,6 +1,18 @@
 use user_manager::router::build_router;
 
+use async_signal::{Signal, Signals};
+use futures_util::StreamExt;
 use tower_http::services::ServeDir;
+
+async fn signal_handler() {
+    let mut signals = Signals::new([Signal::Term, Signal::Int]).unwrap();
+
+    while let Some(signal) = signals.next().await {
+        if matches!(signal, Ok(Signal::Int) | Ok(Signal::Term)) {
+            break;
+        }
+    }
+}
 
 #[tokio::main]
 async fn main() {
@@ -9,9 +21,10 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:27000")
         .await
         .unwrap();
-
-    axum::serve(listener, router).await.unwrap();
-
+    axum::serve(listener, router)
+        .with_graceful_shutdown(signal_handler())
+        .await
+        .unwrap();
     // let client_registry = client_registry();
     // let authorizer = AuthMap::new(RandomGenerator::new(16));
     // let solicitor = FnSolicitor(|_req| Ok(())); // Simplified user consent
