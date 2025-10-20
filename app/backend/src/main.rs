@@ -18,7 +18,7 @@ async fn signal_handler() {
 async fn main() {
     let router = build_router().fallback_service(ServeDir::new("./static"));
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:27000")
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:27000")
         .await
         .unwrap();
     axum::serve(listener, router)
