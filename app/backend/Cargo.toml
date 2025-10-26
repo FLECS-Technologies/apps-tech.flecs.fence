@@ -17,11 +17,15 @@ tempfile = "3.21.0"
 tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.6.6", features = ["fs"] }
 url = "2.5.7"
-utoipa = { version = "5.4.0", features = ["axum_extras", "debug", "openapi_extensions", "yaml"] }
+utoipa = { version = "5.4.0", features = ["axum_extras", "debug", "openapi_extensions", "yaml", "url"] }
 uuid = { version = "1.18.1", features = ["v4"] }
 zeroize = { version = "1.8.1", features = ["derive"] }
 async-signal = "0.2"
 futures-util = "0.3"
+jsonwebtoken = "9.3"
+chrono = "0.4"
+openssl = "0.10"
+base64 = "0.22"
 
 [profile.release-with-debug]
 inherits = "release"

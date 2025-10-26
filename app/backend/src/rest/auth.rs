@@ -12,6 +12,8 @@ use crate::model::password::Password;
 use crate::model::session::UserSession;
 use crate::state;
 
+pub mod meta;
+
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct LoginRequest {
     username: String,

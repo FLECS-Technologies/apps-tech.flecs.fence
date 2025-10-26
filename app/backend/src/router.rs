@@ -11,6 +11,8 @@ pub fn build_router() -> Router {
     Router::new()
         .route("/", get(|| async { "Hello World!" }))
         .route("/login", post(rest::auth::post_login))
+        .route("/meta/issuer", get(rest::auth::meta::get_issuer))
+        .route("/meta/jwk", get(rest::auth::meta::get_jwk))
         .route("/users", get(rest::users::get_all))
         .route(
             "/users/super-admin",
