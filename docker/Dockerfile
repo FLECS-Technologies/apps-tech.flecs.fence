@@ -45,6 +45,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /user-manager /
+COPY app/backend/static /static
 
 EXPOSE 27000
 ENTRYPOINT [ "/user-manager" ]

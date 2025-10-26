@@ -23,7 +23,7 @@ impl Default for AppState {
         Self {
             registrar: Arc::new(Mutex::new(build_registrar())),
             authorizer: Arc::new(Mutex::new(Authorizer::new(RandomGenerator::new(16)))),
-            issuer: Arc::new(Mutex::new(Issuer::new(RandomGenerator::new(16)))),
+            issuer: Arc::new(Mutex::new(Issuer::new())),
             login_sessions: Arc::new(Mutex::new(HashSet::new())),
             user_sessions: Arc::new(Mutex::new(HashSet::new())),
             db: Arc::new(Mutex::new(persist::Db::default())),

@@ -4,8 +4,11 @@
   "image": "tech.flecs.fence",
   "provides": {
     "auth": {
-      "issuer_url": "https://localhost",
-      "kind": "oidc",
+      "issuer_url": "http://fence.flecs.local:27000/meta/issuer",
+      "jwk_url": "http://fence.flecs.local:27000/meta/jwk",
+      "authorize_url": "http://fence.flecs.local:27000/oauth/authorize",
+      "token_url": "http://fence.flecs.local:27000/oauth/token",
+      "kind": "oauth",
       "name": "Fence",
       "port": 27000
     }
