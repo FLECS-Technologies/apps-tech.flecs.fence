@@ -2,7 +2,13 @@ ARG ARCH
 ARG VERSION
 ARG VARIANT
 
-FROM --platform=linux/amd64 flecspublic.azurecr.io/flecs-build AS base
+FROM --platform=linux/amd64 flecspublic.azurecr.io/flecs-build AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        libssl-dev \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /base
 
@@ -15,10 +21,6 @@ RUN rustup show
 
 ## Targets have to be added additionally
 RUN rustup target add x86_64-unknown-linux-gnu
-RUN rustup target add aarch64-unknown-linux-gnu
-RUN rustup target add armv7-unknown-linux-gnueabihf
-
-FROM base AS build
 
 ARG TARGET=x86_64-unknown-linux-gnu
 ARG BUILD_TYPE="debug"
@@ -26,6 +28,8 @@ ENV CARGO_ARGS="--target ${TARGET} --path ."
 
 WORKDIR /src
 COPY app/backend .
+
+ENV RUSTFLAGS="-C target-feature=+crt-static"
 
 RUN if [ "$BUILD_TYPE" = "debug" ]; then \
       cargo install $CARGO_ARGS --debug; \
@@ -36,15 +40,9 @@ RUN if [ "$BUILD_TYPE" = "debug" ]; then \
 # Move resulting binary to hardcoded path to avoid constructing path in last stage
 RUN mv $CARGO_HOME/bin/user-manager /
 
-FROM debian:bookworm-slim
+FROM gcr.io/distroless/static-debian12
 
-RUN apt-get update && \
-    apt-get --yes --no-install-recommends install \
-    ca-certificates && \
-    apt-get --yes clean && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY --from=build /user-manager /
+COPY --from=builder /user-manager /
 COPY app/backend/static /static
 
 EXPOSE 27000
