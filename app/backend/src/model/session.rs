@@ -81,7 +81,7 @@ impl UserSession {
     pub fn new(uid: Uid) -> Self {
         Self {
             sid: new_sid(),
-            uid: uid,
+            uid,
         }
     }
 
