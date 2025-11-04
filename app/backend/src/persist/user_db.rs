@@ -47,6 +47,6 @@ impl UserDB {
 impl Drop for UserDB {
     fn drop(&mut self) {
         self.save()
-            .unwrap_or_else(|e| println!("{}", format!("Could not persist user database: {}", e)));
+            .unwrap_or_else(|e| println!("Could not persist user database: {e}"));
     }
 }

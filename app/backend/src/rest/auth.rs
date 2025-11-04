@@ -8,7 +8,6 @@ use cookie::Cookie;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::model::password::Password;
 use crate::model::session::UserSession;
 use crate::state;
 
@@ -58,12 +57,10 @@ pub async fn post_login(
     }
 
     let user = user.unwrap();
-    if let Err(_) = user.password.verify(&payload.password) {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json::from(r##"{"reason":"Invalid username and/or password"}"##),
-        ));
-    }
+    user.password.verify(&payload.password).map_err(|_| (
+        StatusCode::FORBIDDEN,
+        Json::from(r##"{"reason":"Invalid username and/or password"}"##),
+    ))?;
 
     /* login successful, remove login session, if any */
     let mut login_sessions = state.login_sessions.lock().unwrap();
@@ -75,7 +72,7 @@ pub async fn post_login(
 
     /* create new user-session and tie it to the user's uid */
     /* @todo add granted scope to user session */
-    let user_session = UserSession::new(user.uid.clone());
+    let user_session = UserSession::new(user.uid);
 
     let cookie = Cookie::build(("sid", user_session.get_sid()))
         .path("/")
@@ -108,22 +105,4 @@ fn extract_sid_from_request_headers(headers: &HeaderMap) -> Option<String> {
         .flat_map(|raw| Cookie::split_parse(raw).filter_map(Result::ok))
         .find(|cookie| cookie.name() == "sid")
         .map(|cookie| cookie.value().to_string())
-}
-
-fn has_login_session(headers: &HeaderMap, sid: &str) -> bool {
-    headers
-        .get_all(axum::http::header::COOKIE)
-        .iter()
-        .filter_map(|v| v.to_str().ok())
-        .flat_map(|raw| Cookie::split_parse(raw).filter_map(Result::ok))
-        .any(|cookie| cookie.name() == "sid" && cookie.value() == sid)
-}
-
-fn has_valid_session(headers: &HeaderMap) -> bool {
-    headers
-        .get_all(axum::http::header::COOKIE)
-        .iter()
-        .filter_map(|v| v.to_str().ok())
-        .flat_map(|raw| Cookie::split_parse(raw).filter_map(Result::ok))
-        .any(|cookie| cookie.name() == "sid")
 }

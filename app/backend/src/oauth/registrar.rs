@@ -49,7 +49,7 @@ impl Registrar {
         self.password_policy = Some(Box::new(new_policy))
     }
 
-    fn current_policy<'a>(policy: &'a Option<Box<dyn PasswordPolicy>>) -> &'a dyn PasswordPolicy {
+    fn current_policy(policy: &Option<Box<dyn PasswordPolicy>>) -> &dyn PasswordPolicy {
         policy
             .as_ref()
             .map(|boxed| &**boxed)
