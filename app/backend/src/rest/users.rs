@@ -51,6 +51,7 @@ pub async fn put(user: Result<Json<user::User>, JsonRejection>) -> String {
 #[utoipa::path(
     get,
     path="/users/super-admin",
+    tag = "Experimental",
     responses(
         (status = NO_CONTENT, description = "Super admin exists"),
         (status = NOT_FOUND, description = "Super admin does not exist"),
@@ -67,6 +68,7 @@ pub async fn get_super_admin(State(state): State<state::AppState>) -> StatusCode
 #[utoipa::path(
     post,
     path="/users/super-admin",
+    tag = "Experimental",
     request_body(
         content = SuperAdmin,
         description = "The super admin that should be set",
