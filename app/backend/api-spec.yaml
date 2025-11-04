@@ -12,7 +12,7 @@ paths:
   /meta/issuer:
     get:
       tags:
-      - rest::auth::meta
+      - Experimental
       operationId: get_issuer
       responses:
         '200':
@@ -24,7 +24,7 @@ paths:
   /meta/jwk:
     get:
       tags:
-      - rest::auth::meta
+      - Experimental
       operationId: get_jwk
       responses:
         '200':
@@ -35,7 +35,7 @@ paths:
   /users/super-admin:
     get:
       tags:
-      - rest::users
+      - Experimental
       operationId: get_super_admin
       responses:
         '204':
@@ -44,7 +44,7 @@ paths:
           description: Super admin does not exist
     post:
       tags:
-      - rest::users
+      - Experimental
       operationId: post_super_admin
       requestBody:
         description: The super admin that should be set

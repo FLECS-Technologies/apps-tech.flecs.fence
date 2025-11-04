@@ -26,6 +26,7 @@ impl ToSchema for Uri {}
 #[utoipa::path(
     get,
     path="/meta/issuer",
+    tag = "Experimental",
     responses(
         (status = OK, description = "Issuer that issues auth tokens", body = Uri)
     )
@@ -38,6 +39,7 @@ pub async fn get_issuer(State(state): State<state::AppState>) -> Response {
 #[utoipa::path(
     get,
     path="/meta/jwk",
+    tag = "Experimental",
     responses(
         (status = OK, description = "Jwk that has to be used to verify issued tokens", body = serde_json::Value)
     )
