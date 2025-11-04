@@ -2,6 +2,8 @@
 name = "user-manager"
 version = "0.1.0"
 edition = "2024"
+license = "Apache-2.0"
+authors = ["FLECS Technologies GmbH"]
 
 [dependencies]
 anyhow = "1.0.99"
@@ -31,6 +33,6 @@ base64 = "0.22"
 inherits = "release"
 debug = true
 
-#[[bin]]
-#name = "gen_openapi"
-#path = "src/gen_openapi.rs"
+[[bin]]
+name = "gen-openapi"
+path = "./src/gen_openapi.rs"

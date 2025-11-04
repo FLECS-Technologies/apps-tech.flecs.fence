@@ -1,4 +1,5 @@
 use serde::Serialize;
+use user_manager::rest;
 use utoipa::{
     Modify, OpenApi,
     openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
@@ -19,20 +20,18 @@ impl Modify for Security {
                         .build(),
                 ),
             );
-            eprintln!("added scheme {schema:?}");
         }
     }
 }
-
-mod model;
-mod rest;
 
 #[derive(OpenApi)]
 #[openapi(
     modifiers(&Security),
     paths(
-        rest::users::get_all,
-        rest::users::get
+        rest::users::get_super_admin,
+        rest::users::post_super_admin,
+        rest::auth::meta::get_jwk,
+        rest::auth::meta::get_issuer,
     ),
     // Top-level security requirement (applies to every operation by default)
     security(

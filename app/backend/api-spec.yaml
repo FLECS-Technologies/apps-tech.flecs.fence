@@ -2,34 +2,92 @@ openapi: 3.1.0
 info:
   title: user-manager
   description: ''
+  contact:
+    name: FLECS Technologies GmbH
   license:
-    name: ''
+    name: Apache-2.0
+    identifier: Apache-2.0
   version: 0.1.0
 paths:
-  /users:
+  /meta/issuer:
     get:
       tags:
-      - rest::users
-      operationId: get_all
-      responses:
-        '404':
-          description: No users
-  /users/{uid}:
-    get:
-      tags:
-      - rest::users
-      operationId: get
-      parameters:
-      - name: uid
-        in: path
-        description: User ID to query
-        required: true
-        schema:
-          $ref: '#/components/schemas/u16'
+      - rest::auth::meta
+      operationId: get_issuer
       responses:
         '200':
-          description: Return a single user by its uid
+          description: Issuer that issues auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Uri'
+  /meta/jwk:
+    get:
+      tags:
+      - rest::auth::meta
+      operationId: get_jwk
+      responses:
+        '200':
+          description: Jwk that has to be used to verify issued tokens
+          content:
+            application/json:
+              schema: {}
+  /users/super-admin:
+    get:
+      tags:
+      - rest::users
+      operationId: get_super_admin
+      responses:
+        '204':
+          description: Super admin exists
+        '404':
+          description: Super admin does not exist
+    post:
+      tags:
+      - rest::users
+      operationId: post_super_admin
+      requestBody:
+        description: The super admin that should be set
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuperAdmin'
+        required: true
+      responses:
+        '200':
+          description: Super admin was created
+        '400':
+          description: Invalid password
+          content:
+            text/plain:
+              schema:
+                type: string
+        '409':
+          description: Super admin already exists
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
+  schemas:
+    SuperAdmin:
+      type: object
+      required:
+      - name
+      - full_name
+      - password
+      properties:
+        full_name:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+    Uri:
+      type: string
+      format: uri
   securitySchemes:
     bearerAuth:
       type: http
