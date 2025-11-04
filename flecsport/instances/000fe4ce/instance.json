@@ -1,0 +1,22 @@
+{
+  "type": "Docker",
+  "id": 1041614,
+  "app_key": {
+    "name": "tech.flecs.fence",
+    "version": "0.1.0"
+  },
+  "deployment_id": "DefaultDockerDeployment",
+  "name": "Fence",
+  "hostname": "flecs-000fe4ce",
+  "config": {
+    "connected_networks": {
+      "flecs": "172.21.0.2"
+    },
+    "providers": {
+      "auth": {
+        "port": 52100
+      }
+    }
+  },
+  "desired": "Running"
+}
