@@ -23,7 +23,7 @@ RUN rustup show
 RUN rustup target add x86_64-unknown-linux-gnu
 
 ARG TARGET=x86_64-unknown-linux-gnu
-ARG BUILD_TYPE="debug"
+ARG BUILD_TYPE="release"
 ENV CARGO_ARGS="--target ${TARGET} --path ."
 
 WORKDIR /src
