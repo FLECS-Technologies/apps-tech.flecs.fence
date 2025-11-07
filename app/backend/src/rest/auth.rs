@@ -1,7 +1,7 @@
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::Html;
 use axum::{
-    extract::{Json, State, rejection::JsonRejection},
+    extract::{Form, Json, State, rejection::FormRejection},
     response::{IntoResponse, Redirect},
 };
 use cookie::Cookie;
@@ -35,13 +35,13 @@ pub struct LoginResponse {
 pub async fn post_login(
     State(state): State<state::AppState>,
     headers: HeaderMap,
-    payload: Result<Json<LoginRequest>, JsonRejection>,
+    payload: Result<Form<LoginRequest>, FormRejection>,
 ) -> impl IntoResponse {
     /* validate payload */
     if payload.is_err() {
         return Err((
             StatusCode::BAD_REQUEST,
-            Json::from(r##"{"reason":"Invalid request body"}"##),
+            Json::from(r##"{"reason":"Invalid form data"}"##),
         ));
     }
     let payload = payload.unwrap();
