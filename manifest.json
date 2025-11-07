@@ -3,6 +3,9 @@
   "app": "tech.flecs.fence",
   "version": "##VERSION##",
   "image": "flecs.azurecr.io/tech.flecs.fence",
+  "volumes": [
+    "fence:/var/local/lib/fence"
+  ],
   "provides": {
     "auth": {
       "issuer_url": "http://fence.flecs.local:27000/meta/issuer",

@@ -6,7 +6,7 @@ use std::io::{BufReader, Write};
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Serialize};
 
 use group_db::GroupDB;
 use user_db::UserDB;
@@ -19,8 +19,8 @@ pub struct Db {
 impl Default for Db {
     fn default() -> Self {
         Self {
-            groups: GroupDB::new("/tmp/groups.json".into()).unwrap(),
-            users: UserDB::new("/tmp/users.json".into()).unwrap(),
+            groups: GroupDB::new("/var/local/lib/fence/groups.json".into()).unwrap(),
+            users: UserDB::new("/var/local/lib/fence/users.json".into()).unwrap(),
         }
     }
 }
