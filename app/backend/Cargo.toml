@@ -28,6 +28,7 @@ jsonwebtoken = "9.3"
 chrono = "0.4"
 openssl = "0.10"
 base64 = "0.22"
+askama = "0.14.0"
 
 [profile.release-with-debug]
 inherits = "release"
