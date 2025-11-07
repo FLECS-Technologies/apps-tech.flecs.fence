@@ -1,4 +1,6 @@
-use axum::extract::{RawQuery, State, Query};
+use crate::model::session::LoginSession;
+use crate::state::AppState;
+use axum::extract::{Query, RawQuery, State};
 use axum::http::{HeaderMap, header};
 use axum::response::{IntoResponse, Redirect};
 use cookie::{Cookie, time};
@@ -6,8 +8,6 @@ use oxide_auth::endpoint::{OwnerConsent, Solicitation};
 use oxide_auth::frontends::simple::endpoint::{FnSolicitor, Vacant};
 use oxide_auth_axum::OAuthRequest;
 use serde::{Deserialize, Serialize};
-use crate::model::session::LoginSession;
-use crate::state::AppState;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RedirectQuery {
@@ -53,7 +53,7 @@ pub async fn get_authorize(
         let mut login_sessions = state.login_sessions.lock().unwrap();
         login_sessions.insert(session);
 
-        return (set_cookie, Redirect::to("/ui/login.html")).into_response();
+        return (set_cookie, Redirect::to("/login")).into_response();
     }
 
     let user_session = user_session.unwrap();

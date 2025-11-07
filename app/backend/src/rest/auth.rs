@@ -1,7 +1,8 @@
+use askama::Template;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::Html;
 use axum::{
-    extract::{Form, Json, State, rejection::FormRejection},
+    extract::{Form, State, rejection::FormRejection},
     response::{IntoResponse, Redirect},
 };
 use cookie::Cookie;
@@ -24,6 +25,12 @@ pub struct LoginResponse {
     status: String,
 }
 
+#[derive(Template)]
+#[template(path = "login.html")]
+struct LoginTemplate<'a> {
+    error: Option<&'a str>,
+}
+
 #[utoipa::path(
     post,
     path="/login",
@@ -32,6 +39,11 @@ pub struct LoginResponse {
         (status = NOT_FOUND, description = "No users")
     )
 )]
+
+pub async fn get_login() -> impl IntoResponse {
+    Html(LoginTemplate { error: None }.render().unwrap())
+}
+
 pub async fn post_login(
     State(state): State<state::AppState>,
     headers: HeaderMap,
@@ -39,10 +51,10 @@ pub async fn post_login(
 ) -> impl IntoResponse {
     /* validate payload */
     if payload.is_err() {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            Json::from(r##"{"reason":"Invalid form data"}"##),
-        ));
+        let html = LoginTemplate {
+            error: Some("Invalid form data"),
+        };
+        return Err((StatusCode::FORBIDDEN, Html(html.render().unwrap())));
     }
     let payload = payload.unwrap();
 
@@ -50,17 +62,25 @@ pub async fn post_login(
     let db = state.db.lock().unwrap();
     let user = db.users.query_by_name(&payload.username);
     if user.is_none() {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json::from(r##"{"reason":"Invalid username and/or password"}"##),
-        ));
+        let html = LoginTemplate {
+            error: Some("Invalid username and/or password"),
+        };
+        return Err((StatusCode::FORBIDDEN, Html(html.render().unwrap())));
     }
 
     let user = user.unwrap();
-    user.password.verify(&payload.password).map_err(|_| (
-        StatusCode::FORBIDDEN,
-        Json::from(r##"{"reason":"Invalid username and/or password"}"##),
-    ))?;
+    user.password.verify(&payload.password).map_err(|_| {
+        (
+            StatusCode::FORBIDDEN,
+            Html(
+                LoginTemplate {
+                    error: Some("Invalid username and/or password"),
+                }
+                .render()
+                .unwrap(),
+            ),
+        )
+    })?;
 
     /* login successful, remove login session, if any */
     let mut login_sessions = state.login_sessions.lock().unwrap();

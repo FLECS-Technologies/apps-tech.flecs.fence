@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Created with ❤️ by FLECS" />
+  <title>FLECS - Login</title>
+  <link rel="icon" type="image/x-icon" href="ui/images/favicon.ico" />
+  <link rel="stylesheet" href="ui/css/main.css" />
+</head>
+
+<body>
+  <main class="card">
+    <div class="header">
+      <img src="ui/images/logo.svg" alt="FLECS Logo" class="logo" />
+      <h1>Please sign in to continue</h1>
+    </div>
+    <form id="loginForm" autocomplete="on" spellcheck="false" action="/login" method="POST"
+      class="{% if error.is_some() %}has-error{% endif %}">
+      <div class="row">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required autocomplete="username" autocapitalize="none" />
+      </div>
+      <div class="row">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" />
+      </div>
+      <button id="loginBtn" type="submit">Login</button>
+      <div id="status" role="status" aria-live="polite"></div>
+
+      <!-- Always present; text toggles, but height stays the same -->
+      <p class="form-message" role="status" aria-live="polite">
+        {% if let Some(e) = error %}{{ e }}{% else %}&nbsp;{% endif %}
+      </p>
+    </form>
+    <noscript>
+      <p class="note">JavaScript is required to submit as JSON.</p>
+    </noscript>
+  </main>
+
+  <script>
+  </script>
+</body>
+
+</html>
