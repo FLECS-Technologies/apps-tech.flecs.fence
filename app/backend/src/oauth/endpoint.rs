@@ -101,7 +101,7 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
             &self.encoding_key,
         ) {
             Ok(token) => {
-                println!("Created token: {token}");
+                println!("Created token");
                 Ok(IssuedToken {
                     token,
                     refresh: None,
