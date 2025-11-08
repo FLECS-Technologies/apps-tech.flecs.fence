@@ -105,6 +105,9 @@ pub async fn post_token(State(state): State<AppState>, req: OAuthRequest) -> imp
     let resp = ep.access_token_flow().execute(req);
     match resp {
         Ok(r) => r.into_response(),
-        Err(e) => (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response(),
+        Err(e) => {
+            println!("{:#?}", e);
+            (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response(),
+        }
     }
 }
