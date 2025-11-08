@@ -1,7 +1,7 @@
 use crate::model::session::LoginSession;
 use crate::state::AppState;
-use axum::extract::{Query, RawQuery, State};
-use axum::http::{HeaderMap, header};
+use axum::extract::{RawQuery, State};
+use axum::http::{HeaderMap, StatusCode, header};
 use axum::response::{IntoResponse, Redirect};
 use cookie::{Cookie, time};
 use oxide_auth::endpoint::{OwnerConsent, Solicitation};
@@ -17,7 +17,6 @@ pub struct RedirectQuery {
 pub async fn get_authorize(
     State(state): State<AppState>,
     RawQuery(raw_query): RawQuery,
-    Query(query): Query<RedirectQuery>,
     headers: HeaderMap,
     req: OAuthRequest,
 ) -> impl IntoResponse {
@@ -77,10 +76,16 @@ pub async fn get_authorize(
         response: Vacant,
     };
     println!("Triggering authorization_flow()");
+
     let resp = ep.authorization_flow().execute(req);
-    println!("{:#?}", resp);
-    let location = query.redirect_uri.unwrap_or_else(|| "/".to_string());
-    Redirect::to(&location).into_response()
+
+    match resp {
+        Ok(r) => r.into_response(),
+        Err(e) => {
+            println!("{:#?}", e);
+            (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response()
+        }
+    }
 }
 
 pub async fn post_token(State(state): State<AppState>, req: OAuthRequest) -> impl IntoResponse {
