@@ -69,6 +69,7 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
             exp: u64,
             iss: url::Url,
             email: String,
+            aud: Vec<String>,
             preferred_username: String,
             realm_access: RealmAccess,
             resource_access: ResourceAccess,
@@ -80,6 +81,7 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
             exp: until.timestamp() as u64,
             iss: self.url.clone(),
             email: "test@flecs.local".to_string(),
+            aud: vec!["flecs-core-api".to_string()],
             preferred_username: "Super Admin".to_string(),
             realm_access: RealmAccess {
                 roles: vec!["tech.flecs.core.admin".to_string()],
