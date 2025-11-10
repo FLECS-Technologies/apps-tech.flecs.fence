@@ -107,7 +107,7 @@ pub async fn post_token(State(state): State<AppState>, req: OAuthRequest) -> imp
         Ok(r) => r.into_response(),
         Err(e) => {
             println!("{:#?}", e);
-            (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response(),
+            (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response()
         }
     }
 }
