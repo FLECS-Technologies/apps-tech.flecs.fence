@@ -21,6 +21,11 @@ pub fn build_router() -> Router {
         )
         .route("/users/{uid}", get(rest::users::get))
         .nest("/oauth", crate::oauth::routes::build_router())
-        .layer(CorsLayer::new().allow_methods(Any).allow_origin(Any))
+        .layer(
+            CorsLayer::new()
+                .allow_methods(Any)
+                .allow_origin(Any)
+                .allow_headers(Any),
+        )
         .with_state(state)
 }
