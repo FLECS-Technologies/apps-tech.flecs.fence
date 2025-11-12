@@ -20,7 +20,8 @@
       class="{% if error.is_some() %}has-error{% endif %}">
       <div class="row">
         <label for="username">Username</label>
-        <input id="username" name="username" type="text" required autocomplete="username" autocapitalize="none" />
+        <input id="username" name="username" type="text" required autocomplete="username" autocapitalize="none"
+          autofocus />
       </div>
       <div class="row">
         <label for="password">Password</label>
@@ -34,13 +35,7 @@
         {% if let Some(e) = error %}{{ e }}{% else %}&nbsp;{% endif %}
       </p>
     </form>
-    <noscript>
-      <p class="note">JavaScript is required to submit as JSON.</p>
-    </noscript>
   </main>
-
-  <script>
-  </script>
 </body>
 
 </html>
