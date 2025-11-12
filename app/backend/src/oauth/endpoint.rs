@@ -13,6 +13,8 @@ use oxide_auth::primitives::prelude::RandomGenerator;
 use serde::{Deserialize, Serialize};
 use std::ops::Add;
 
+const TOKEN_DURATION: chrono::Duration = chrono::Duration::days(1);
+
 pub type Authorizer = AuthMap<RandomGenerator>;
 
 pub struct Issuer {
@@ -75,7 +77,7 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
             resource_access: ResourceAccess,
         }
         // TODO: Check if grant expires earlier
-        let until = chrono::Utc::now().add(chrono::Duration::hours(1));
+        let until = chrono::Utc::now().add(TOKEN_DURATION);
         let claims = Claims {
             sub: grant.owner_id,
             exp: until.timestamp() as u64,
