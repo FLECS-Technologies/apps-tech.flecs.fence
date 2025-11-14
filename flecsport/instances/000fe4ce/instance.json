@@ -16,12 +16,12 @@
       "auth": {
         "port": 52100
       }
-    }
-  },
-  "volume_mounts": {
-    "flecs-000fe4ce-fence": {
-      "name": "flecs-000fe4ce-fence",
-      "container_path": "/var/local/lib/fence"
+    },
+    "volume_mounts": {
+      "flecs-000fe4ce-fence": {
+        "name": "flecs-000fe4ce-fence",
+        "container_path": "/var/local/lib/fence"
+      }
     }
   },
   "desired": "Running"
