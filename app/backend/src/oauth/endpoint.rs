@@ -35,7 +35,7 @@ impl Issuer {
         let e = b64url.encode(&e);
         let jwk = jsonwebtoken::jwk::Jwk {
             common: CommonParameters {
-                key_id: Some("flecs-kid".to_string()),
+                key_id: Some(uuid::Uuid::new_v4().to_string()),
                 public_key_use: Some(PublicKeyUse::Signature),
                 key_algorithm: Some(KeyAlgorithm::RS256),
                 ..Default::default()
@@ -97,7 +97,7 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
 
         match jsonwebtoken::encode(
             &jsonwebtoken::Header {
-                kid: Some("flecs-kid".to_string()),
+                kid: self.jwk.common.key_id.clone(),
                 alg: Algorithm::RS256,
                 ..jsonwebtoken::Header::default()
             },
