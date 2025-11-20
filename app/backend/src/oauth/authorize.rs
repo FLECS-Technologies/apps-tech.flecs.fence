@@ -30,9 +30,9 @@ pub async fn get_authorize(
         .map(|cookie| cookie.value().to_string());
 
     /* Try to find matching user_session (i.e. user is logged in) */
-    let user_sessions = state.user_sessions.lock().unwrap();
+    let mut user_sessions = state.user_sessions.lock().unwrap();
     let user_session = match sid {
-        Some(ref sid) => user_sessions.get(sid.as_str()),
+        Some(ref sid) => user_sessions.take(sid.as_str()),
         None => None,
     };
 
