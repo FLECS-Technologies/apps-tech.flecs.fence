@@ -1,6 +1,5 @@
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD as b64url;
-use jsonwebtoken::Algorithm;
 use jsonwebtoken::jwk::{
     AlgorithmParameters, CommonParameters, KeyAlgorithm, PublicKeyUse, RSAKeyParameters, RSAKeyType,
 };
@@ -8,12 +7,8 @@ use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
 use oxide_auth::primitives::authorizer::AuthMap;
 use oxide_auth::primitives::grant::Grant;
-use oxide_auth::primitives::issuer::{IssuedToken, RefreshedToken, TokenType};
+use oxide_auth::primitives::issuer::{IssuedToken, RefreshedToken};
 use oxide_auth::primitives::prelude::RandomGenerator;
-use serde::{Deserialize, Serialize};
-use std::ops::Add;
-
-const TOKEN_DURATION: chrono::Duration = chrono::Duration::days(1);
 
 pub type Authorizer = AuthMap<RandomGenerator>;
 
@@ -56,62 +51,15 @@ impl Issuer {
 
 impl oxide_auth::primitives::issuer::Issuer for Issuer {
     fn issue(&mut self, grant: Grant) -> Result<IssuedToken, ()> {
-        #[derive(Debug, Serialize, Deserialize)]
-        struct RealmAccess {
-            roles: Vec<String>,
-        }
-        type Account = RealmAccess;
-        #[derive(Debug, Serialize, Deserialize)]
-        struct ResourceAccess {
-            account: Account,
-        }
-        #[derive(Debug, Serialize, Deserialize)]
-        struct Claims {
-            sub: String,
-            exp: u64,
-            iss: url::Url,
-            email: String,
-            aud: Vec<String>,
-            preferred_username: String,
-            realm_access: RealmAccess,
-            resource_access: ResourceAccess,
-        }
-        // TODO: Check if grant expires earlier
-        let until = chrono::Utc::now().add(TOKEN_DURATION);
-        let claims = Claims {
-            sub: grant.owner_id,
-            exp: until.timestamp() as u64,
-            iss: self.url.clone(),
-            email: "test@flecs.local".to_string(),
-            aud: vec!["flecs-core-api".to_string()],
-            preferred_username: "Super Admin".to_string(),
-            realm_access: RealmAccess {
-                roles: vec!["tech.flecs.core.admin".to_string()],
-            },
-            resource_access: ResourceAccess {
-                account: Account {
-                    roles: vec!["tech.flecs.core.admin".to_string()],
-                },
-            },
-        };
-
-        match jsonwebtoken::encode(
-            &jsonwebtoken::Header {
-                kid: self.jwk.common.key_id.clone(),
-                alg: Algorithm::RS256,
-                ..jsonwebtoken::Header::default()
-            },
-            &claims,
+        match crate::token::issue(
+            grant,
+            self.url.clone(),
+            self.jwk.common.key_id.clone(),
             &self.encoding_key,
         ) {
             Ok(token) => {
                 println!("Created token");
-                Ok(IssuedToken {
-                    token,
-                    refresh: None,
-                    until,
-                    token_type: TokenType::Bearer,
-                })
+                Ok(token)
             }
             Err(e) => {
                 eprintln!("Error encoding token: {e}");
