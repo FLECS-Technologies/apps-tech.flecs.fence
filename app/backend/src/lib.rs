@@ -4,3 +4,4 @@ pub mod persist;
 pub mod rest;
 pub mod router;
 pub mod state;
+pub mod token;
