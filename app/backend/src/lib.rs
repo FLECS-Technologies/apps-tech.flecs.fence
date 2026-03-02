@@ -1,3 +1,4 @@
+pub mod middleware;
 pub mod model;
 pub mod oauth;
 pub mod persist;
