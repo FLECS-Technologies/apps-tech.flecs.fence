@@ -1,0 +1,9 @@
+#p,role,resource,method
+p,*,/users/super-admin,GET
+p,*,/users/super-admin,POST
+p,*,/login,GET
+p,*,/login,POST
+p,*,/meta/issuer,GET
+p,*,/meta/jwk,GET
+p,*,/oauth,*
+p,*,/oauth/*,*

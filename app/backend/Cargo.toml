@@ -32,6 +32,7 @@ openssl = "0.10"
 base64 = "0.22"
 askama = "0.14.0"
 http = "1.3"
+casbin = { version = "2.10" , features = ["logging"]}
 
 [profile.release-with-debug]
 inherits = "release"

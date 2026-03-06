@@ -3,6 +3,7 @@ use user_manager::router::build_router;
 use async_signal::{Signal, Signals};
 use futures_util::StreamExt;
 use tower_http::services::ServeDir;
+use user_manager::state;
 
 async fn signal_handler() {
     let mut signals = Signals::new([Signal::Term, Signal::Int]).unwrap();
@@ -16,7 +17,9 @@ async fn signal_handler() {
 
 #[tokio::main]
 async fn main() {
-    let router = build_router().fallback_service(ServeDir::new("./static"));
+    let enforcer = state::construct_enforcer().await.unwrap();
+    let app_state = state::AppState::new(enforcer);
+    let router = build_router(app_state).fallback_service(ServeDir::new("./static"));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:27000")
         .await

@@ -6,7 +6,7 @@ use std::io::{BufReader, Write};
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 use group_db::GroupDB;
 use user_db::UserDB;
