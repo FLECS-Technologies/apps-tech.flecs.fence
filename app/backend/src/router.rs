@@ -5,12 +5,11 @@ use axum::{
 };
 use tower_http::cors::{Any, CorsLayer};
 
-pub fn build_router() -> Router {
-    let state = AppState::default();
-    let verify_token_middleware = axum::middleware::from_fn_with_state(
-        state.clone(),
-        crate::middleware::token::middleware,
-    );
+pub fn build_router(state: AppState) -> Router {
+    let verify_token_middleware =
+        axum::middleware::from_fn_with_state(state.clone(), crate::middleware::token::middleware);
+    let verify_roles_middleware =
+        axum::middleware::from_fn_with_state(state.clone(), crate::middleware::role::middleware);
     Router::new()
         .route("/", get(|| async { "Hello World!" }))
         .route("/login", get(rest::auth::get_login))
@@ -30,6 +29,7 @@ pub fn build_router() -> Router {
                 .allow_origin(Any)
                 .allow_headers(Any),
         )
+        .layer(verify_roles_middleware)
         .layer(verify_token_middleware)
         .with_state(state)
 }

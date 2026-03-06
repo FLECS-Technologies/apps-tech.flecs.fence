@@ -60,6 +60,7 @@ FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder /user-manager /
 COPY app/backend/static /static
+COPY docker/fs/ /
 
 EXPOSE 27000
 ENTRYPOINT [ "/user-manager" ]
