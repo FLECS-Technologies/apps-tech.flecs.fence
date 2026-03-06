@@ -49,10 +49,10 @@ RUN \
   export RUSTFLAGS="-C target-feature=+crt-static -C linker=${TRIPLET}-gcc"; \
   \
   if [ "$BUILD_TYPE" = "debug" ]; then \
-    cargo install ${CARGO_ARGS} --debug; \
+    cargo install ${CARGO_ARGS} --debug --locked; \
     mv $CARGO_HOME/bin/user-manager -o /user-manager; \
   else \
-    cargo install ${CARGO_ARGS}; \
+    cargo install ${CARGO_ARGS} --locked; \
     ${TRIPLET}-strip --strip-all $CARGO_HOME/bin/user-manager -o /user-manager; \
   fi;
 
