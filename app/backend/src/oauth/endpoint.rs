@@ -9,6 +9,7 @@ use oxide_auth::primitives::authorizer::AuthMap;
 use oxide_auth::primitives::grant::Grant;
 use oxide_auth::primitives::issuer::{IssuedToken, RefreshedToken};
 use oxide_auth::primitives::prelude::RandomGenerator;
+use tracing::{debug, error, warn};
 
 pub type Authorizer = AuthMap<RandomGenerator>;
 
@@ -58,28 +59,28 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
             &self.encoding_key,
         ) {
             Ok(token) => {
-                println!("Created token");
+                debug!("Created token");
                 Ok(token)
             }
             Err(e) => {
-                eprintln!("Error encoding token: {e}");
+                error!("Error encoding token: {e}");
                 Err(())
             }
         }
     }
 
     fn refresh(&mut self, _refresh: &str, _grant: Grant) -> Result<RefreshedToken, ()> {
-        eprintln!("fn refresh unimplemented");
+        warn!("fn refresh unimplemented");
         Err(())
     }
 
     fn recover_token<'a>(&'a self, _: &'a str) -> Result<Option<Grant>, ()> {
-        eprintln!("fn recover_token unimplemented");
+        warn!("fn recover_token unimplemented");
         Err(())
     }
 
     fn recover_refresh<'a>(&'a self, _: &'a str) -> Result<Option<Grant>, ()> {
-        eprintln!("fn recover_refresh unimplemented");
+        warn!("fn recover_refresh unimplemented");
         Err(())
     }
 }

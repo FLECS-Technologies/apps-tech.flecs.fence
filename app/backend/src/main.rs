@@ -1,3 +1,4 @@
+use tracing_subscriber::EnvFilter;
 use user_manager::router::build_router;
 
 use async_signal::{Signal, Signals};
@@ -17,6 +18,10 @@ async fn signal_handler() {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_env("RUST_LOG"))
+        .init();
+
     let enforcer = state::construct_enforcer().await.unwrap();
     let app_state = state::AppState::new(enforcer);
     let router = build_router(app_state).fallback_service(ServeDir::new("./static"));

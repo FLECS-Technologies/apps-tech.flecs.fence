@@ -33,6 +33,8 @@ base64 = "0.22"
 askama = "0.14.0"
 http = "1.3"
 casbin = { version = "2.10" , features = ["logging"]}
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [profile.release-with-debug]
 inherits = "release"

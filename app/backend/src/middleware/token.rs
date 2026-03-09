@@ -1,6 +1,7 @@
 use crate::state;
 use axum::response::IntoResponse;
 use axum_extra::headers::HeaderMapExt;
+use tracing::{debug, error};
 
 pub struct AuthToken(pub Option<String>);
 
@@ -45,11 +46,11 @@ pub async fn middleware(
         };
         match crate::token::verify(token, &jwks, &issuer) {
             Err(e) => {
-                eprintln!("Failed to verify token: {e}");
+                error!("Failed to verify token: {e}");
                 return http::StatusCode::UNAUTHORIZED.into_response();
             }
             Ok(roles) => {
-                println!("Successfully verified token, roles: {:?}", roles.0);
+                debug!("Successfully verified token, roles: {:?}", roles.0);
                 request.extensions_mut().insert(roles);
             }
         }

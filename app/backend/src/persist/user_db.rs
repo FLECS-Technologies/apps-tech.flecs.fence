@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use tracing::error;
 
 use crate::model::user::{SUPER_ADMIN_ID, SuperAdmin, Uid, User};
 
@@ -47,6 +48,6 @@ impl UserDB {
 impl Drop for UserDB {
     fn drop(&mut self) {
         self.save()
-            .unwrap_or_else(|e| println!("Could not persist user database: {e}"));
+            .unwrap_or_else(|e| error!("Could not persist user database: {e}"));
     }
 }

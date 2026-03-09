@@ -8,6 +8,7 @@ use oxide_auth::endpoint::{OwnerConsent, Solicitation};
 use oxide_auth::frontends::simple::endpoint::{FnSolicitor, Vacant};
 use oxide_auth_axum::OAuthRequest;
 use serde::{Deserialize, Serialize};
+use tracing::debug;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RedirectQuery {
@@ -75,14 +76,14 @@ pub async fn get_authorize(
         scopes: Vacant,
         response: Vacant,
     };
-    println!("Triggering authorization_flow()");
+    debug!("Triggering authorization_flow()");
 
     let resp = ep.authorization_flow().execute(req);
 
     match resp {
         Ok(r) => r.into_response(),
         Err(e) => {
-            println!("{:#?}", e);
+            debug!("{:#?}", e);
             (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response()
         }
     }
@@ -101,12 +102,12 @@ pub async fn post_token(State(state): State<AppState>, req: OAuthRequest) -> imp
         scopes: Vacant,
         response: Vacant,
     };
-    println!("Triggering access_token_flow()");
+    debug!("Triggering access_token_flow()");
     let resp = ep.access_token_flow().execute(req);
     match resp {
         Ok(r) => r.into_response(),
         Err(e) => {
-            println!("{:#?}", e);
+            debug!("{:#?}", e);
             (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response()
         }
     }

@@ -7,6 +7,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use serde::{Serialize, de::DeserializeOwned};
+use tracing::warn;
 
 use group_db::GroupDB;
 use user_db::UserDB;
@@ -74,7 +75,7 @@ where
     if path.exists() {
         let backup = path.with_extension("bak");
         if let Err(e) = fs::copy(path, &backup) {
-            eprintln!(
+            warn!(
                 "backup '{}' to '{}': {}",
                 path.display(),
                 backup.display(),
