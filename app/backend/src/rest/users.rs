@@ -1,5 +1,5 @@
 use crate::model::user::{CreateUser, SuperAdmin};
-use crate::persist::user_db::InsertUserError;
+use crate::persist::user_db::{InsertUserError, RemoveUserError};
 use crate::{model::user, state};
 use axum::extract::{
     Json, Path, State,
@@ -81,6 +81,41 @@ pub async fn put(
         return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response();
     }
     (StatusCode::CREATED, Json(id)).into_response()
+}
+
+#[utoipa::path(
+    delete,
+    path="/users/{uid}",
+    responses(
+        (status = NO_CONTENT, description = "User was deleted"),
+        (status = NOT_FOUND, description = "User does not exist"),
+        (status = FORBIDDEN, description = "Cannot delete the super admin"),
+        (status = BAD_REQUEST, description = "Invalid user ID"),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal Server Error", body = String),
+    ),
+    params(
+        ("uid" = user::UserId, description = "User ID to delete")
+    )
+)]
+pub async fn delete(
+    State(state): State<state::AppState>,
+    uid: Result<Path<user::UserId>, PathRejection>,
+) -> Response {
+    let uid = match uid {
+        Ok(Path(uid)) => uid,
+        Err(e) => return (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+    };
+    let mut db = state.db.lock().unwrap();
+    match db.users.remove(uid) {
+        Ok(()) => {
+            if let Err(e) = db.users.save() {
+                return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response();
+            }
+            StatusCode::NO_CONTENT.into_response()
+        }
+        Err(RemoveUserError::NotFound(_)) => StatusCode::NOT_FOUND.into_response(),
+        Err(RemoveUserError::SuperAdmin) => StatusCode::FORBIDDEN.into_response(),
+    }
 }
 
 #[utoipa::path(
