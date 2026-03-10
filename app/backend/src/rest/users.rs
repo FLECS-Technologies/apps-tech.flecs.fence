@@ -1,4 +1,4 @@
-use crate::model::user::{CreateUser, SuperAdmin, UserId};
+use crate::model::user::{CreateUser, SuperAdmin, UserId, UserSummary};
 use crate::persist::user_db::{InsertUserError, RemoveUserError};
 use crate::token::Subject;
 use crate::{model::user, state};
@@ -13,11 +13,13 @@ use axum::response::{IntoResponse, Response};
     get,
     path="/users",
     responses(
-        (status = NOT_FOUND, description = "No users")
+        (status = OK, description = "List of all users", body = Vec<UserSummary>),
     )
 )]
-pub async fn get_all(State(state): State<state::AppState>) -> &'static str {
-    "404 Not Found"
+pub async fn get_all(State(state): State<state::AppState>) -> Json<Vec<UserSummary>> {
+    let db = state.db.lock().unwrap();
+    let users: Vec<UserSummary> = db.users.query_all().map(UserSummary::from).collect();
+    Json(users)
 }
 
 #[utoipa::path(

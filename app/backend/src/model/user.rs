@@ -18,6 +18,23 @@ pub struct User {
     pub groups: HashSet<GroupId>,
 }
 
+#[derive(Serialize, ToSchema)]
+pub struct UserSummary {
+    pub id: UserId,
+    pub name: String,
+    pub groups: HashSet<GroupId>,
+}
+
+impl From<&User> for UserSummary {
+    fn from(user: &User) -> Self {
+        Self {
+            id: user.id,
+            name: user.name.clone(),
+            groups: user.groups.clone(),
+        }
+    }
+}
+
 #[derive(Deserialize, ToSchema)]
 pub struct CreateUser {
     pub name: String,

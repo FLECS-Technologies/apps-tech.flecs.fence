@@ -33,6 +33,19 @@ paths:
             application/json:
               schema: {}
   /users:
+    get:
+      tags:
+      - rest::users
+      operationId: get_all
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSummary'
     put:
       tags:
       - rest::users
@@ -183,6 +196,22 @@ components:
     Uri:
       type: string
       format: uri
+    UserSummary:
+      type: object
+      required:
+      - id
+      - name
+      - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupId'
+          uniqueItems: true
+        id:
+          $ref: '#/components/schemas/u16'
+        name:
+          type: string
     u16:
       type: integer
       format: int32

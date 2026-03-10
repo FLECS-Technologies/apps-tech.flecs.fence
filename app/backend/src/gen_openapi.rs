@@ -28,6 +28,7 @@ impl Modify for Security {
 #[openapi(
     modifiers(&Security),
     paths(
+        rest::users::get_all,
         rest::users::put,
         rest::users::delete,
         rest::users::delete_self,
