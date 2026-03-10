@@ -16,6 +16,9 @@ const TOKEN_DURATION: chrono::Duration = chrono::Duration::days(1);
 #[derive(Debug, Clone, Default)]
 pub struct Roles(pub HashSet<String>);
 
+#[derive(Debug, Clone)]
+pub struct Subject(pub String);
+
 #[derive(Debug, Serialize, Deserialize)]
 struct RealmAccess {
     roles: Vec<String>,
@@ -132,7 +135,7 @@ pub fn verify(
     token: &str,
     jwks: &jsonwebtoken::jwk::JwkSet,
     issuer_url: &url::Url,
-) -> Result<Roles, VerifyTokenError> {
+) -> Result<(Roles, Subject), VerifyTokenError> {
     let token_header = jsonwebtoken::decode_header(token)?;
     let kid = token_header.kid.as_deref().ok_or(VerifyTokenError::NoKid)?;
     let jwk = jwks
@@ -145,12 +148,14 @@ pub fn verify(
     validation.set_issuer(&[issuer_url.as_str()]);
     validation.set_required_spec_claims(&["exp", "aud", "iss", "sub"]);
     let claims = jsonwebtoken::decode::<Claims>(token, &decoding_key, &validation)?.claims;
-    Ok(Roles(
+    let subject = Subject(claims.sub);
+    let roles = Roles(
         claims
             .realm_access
             .roles
             .into_iter()
             .chain(claims.resource_access.account.roles)
             .collect(),
-    ))
+    );
+    Ok((roles, subject))
 }

@@ -49,9 +49,13 @@ pub async fn middleware(
                 error!("Failed to verify token: {e}");
                 return http::StatusCode::UNAUTHORIZED.into_response();
             }
-            Ok(roles) => {
-                debug!("Successfully verified token, roles: {:?}", roles.0);
+            Ok((roles, subject)) => {
+                debug!(
+                    "Successfully verified token of {}, roles: {:?}",
+                    subject.0, roles.0
+                );
                 request.extensions_mut().insert(roles);
+                request.extensions_mut().insert(subject);
             }
         }
     } else {
