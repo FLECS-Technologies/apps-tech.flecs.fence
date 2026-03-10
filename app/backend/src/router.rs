@@ -5,6 +5,8 @@ use axum::{
 };
 use tower_http::cors::{Any, CorsLayer};
 
+mod layer;
+
 pub fn build_router(state: AppState) -> Router {
     let verify_token_middleware =
         axum::middleware::from_fn_with_state(state.clone(), crate::middleware::token::middleware);
@@ -31,5 +33,6 @@ pub fn build_router(state: AppState) -> Router {
         )
         .layer(verify_roles_middleware)
         .layer(verify_token_middleware)
+        .layer(layer::logging())
         .with_state(state)
 }
