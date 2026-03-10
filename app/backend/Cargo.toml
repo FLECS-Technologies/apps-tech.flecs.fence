@@ -35,6 +35,7 @@ http = "1.3"
 casbin = { version = "2.10" , features = ["logging"]}
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tower = "0.5.3"
 
 [profile.release-with-debug]
 inherits = "release"
