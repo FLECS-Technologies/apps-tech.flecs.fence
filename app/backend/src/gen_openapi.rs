@@ -30,6 +30,7 @@ impl Modify for Security {
     paths(
         rest::users::put,
         rest::users::delete,
+        rest::users::delete_self,
         rest::users::get_super_admin,
         rest::users::post_super_admin,
         rest::auth::meta::get_jwk,
