@@ -37,6 +37,10 @@ impl UserDB {
         Ok(UserDB { path, users })
     }
 
+    pub fn query_all(&self) -> impl Iterator<Item = &User> {
+        self.users.values()
+    }
+
     pub fn query_by_name(&self, name: &str) -> Option<&User> {
         self.users.values().find(|u| u.name == name)
     }
