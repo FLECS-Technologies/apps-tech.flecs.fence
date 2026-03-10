@@ -7,7 +7,7 @@ info:
   license:
     name: Apache-2.0
     identifier: Apache-2.0
-  version: 0.1.0
+  version: 0.2.1
 paths:
   /meta/issuer:
     get:
@@ -32,6 +32,38 @@ paths:
           content:
             application/json:
               schema: {}
+  /users:
+    put:
+      tags:
+      - rest::users
+      operationId: put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+        required: true
+      responses:
+        '201':
+          description: User was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/u16'
+        '400':
+          description: Invalid request body
+          content:
+            text/plain:
+              schema:
+                type: string
+        '409':
+          description: User with that name already exists
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
   /users/super-admin:
     get:
       tags:
@@ -72,6 +104,24 @@ paths:
                 type: string
 components:
   schemas:
+    CreateUser:
+      type: object
+      required:
+      - name
+      - password
+      - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupId'
+          uniqueItems: true
+        name:
+          type: string
+        password:
+          type: string
+    GroupId:
+      type: string
     SuperAdmin:
       type: object
       required:
@@ -88,6 +138,10 @@ components:
     Uri:
       type: string
       format: uri
+    u16:
+      type: integer
+      format: int32
+      minimum: 0
   securitySchemes:
     bearerAuth:
       type: http

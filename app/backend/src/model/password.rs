@@ -13,6 +13,18 @@ use std::sync::LazyLock;
 use utoipa::ToSchema;
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
+#[derive(Debug, thiserror::Error)]
+#[error("Failed to hash password: {0}")]
+pub struct HashError(#[from] argon2::password_hash::Error);
+
+#[derive(Debug, thiserror::Error)]
+pub enum VerifyError {
+    #[error("Password verification failed: {0}")]
+    Hash(#[from] argon2::password_hash::Error),
+    #[error("Attempt to verify plaintext password")]
+    PlainText,
+}
+
 static ARGON2: LazyLock<Argon2> = LazyLock::new(|| {
     Argon2::new(
         argon2::Algorithm::Argon2id,
@@ -73,7 +85,7 @@ impl<'de> Deserialize<'de> for Password {
 }
 
 impl Password {
-    pub fn new(plain: &str) -> anyhow::Result<Self> {
+    pub fn new(plain: &str) -> Result<Self, HashError> {
         let salt = SaltString::generate(&mut OsRng);
         let hash = (*ARGON2).hash_password(plain.as_bytes(), &salt)?;
         Ok(Password::Hashed(hash.to_string()))
@@ -83,12 +95,12 @@ impl Password {
         Ok(Password::Hashed(PasswordHash::new(phc)?.to_string()))
     }
 
-    pub fn verify(&self, plain: &str) -> anyhow::Result<()> {
+    pub fn verify(&self, plain: &str) -> Result<(), VerifyError> {
         match self {
             Password::Hashed(s) => {
                 Ok((*ARGON2).verify_password(plain.as_bytes(), &PasswordHash::new(s.as_str())?)?)
             }
-            _ => Err(anyhow::anyhow!("Attempt to verify plaintext passwords")),
+            _ => Err(VerifyError::PlainText),
         }
     }
 }
