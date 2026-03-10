@@ -2,9 +2,20 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use tracing::error;
 
-use crate::model::user::{SUPER_ADMIN_ID, SuperAdmin, User, UserId};
+use crate::model::password::{self, HashError};
+use crate::model::user::{CreateUser, SUPER_ADMIN_ID, SuperAdmin, User, UserId};
 
 mod versioning;
+
+#[derive(Debug, thiserror::Error)]
+pub enum InsertUserError {
+    #[error("User with name '{0}' already exists")]
+    DuplicateName(String),
+    #[error("No available user IDs")]
+    NoAvailableIds,
+    #[error("Invalid password: {0}")]
+    Password(#[from] HashError),
+}
 
 pub struct UserDB {
     path: PathBuf,
@@ -32,6 +43,24 @@ impl UserDB {
 
     pub fn contains_super_admin(&self) -> bool {
         self.users.contains_key(&SUPER_ADMIN_ID)
+    }
+
+    pub fn insert(&mut self, create: CreateUser) -> Result<UserId, InsertUserError> {
+        if self.query_by_name(&create.name).is_some() {
+            return Err(InsertUserError::DuplicateName(create.name));
+        }
+        let id = (1..=UserId::MAX)
+            .find(|id| !self.users.contains_key(id))
+            .ok_or(InsertUserError::NoAvailableIds)?;
+        let user = User {
+            id,
+            name: create.name,
+            full_name: String::new(),
+            password: password::Password::new(&create.password)?,
+            groups: create.groups,
+        };
+        self.users.insert(id, user);
+        Ok(id)
     }
 
     pub fn set_super_admin(&mut self, super_admin: SuperAdmin) -> anyhow::Result<Option<User>> {

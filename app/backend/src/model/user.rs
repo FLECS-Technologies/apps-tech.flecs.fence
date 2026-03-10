@@ -18,6 +18,13 @@ pub struct User {
     pub groups: HashSet<GroupId>,
 }
 
+#[derive(Deserialize, ToSchema)]
+pub struct CreateUser {
+    pub name: String,
+    pub password: String,
+    pub groups: HashSet<GroupId>,
+}
+
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct SuperAdmin {
     pub name: String,

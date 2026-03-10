@@ -1,4 +1,5 @@
-use crate::model::user::SuperAdmin;
+use crate::model::user::{CreateUser, SuperAdmin};
+use crate::persist::user_db::InsertUserError;
 use crate::{model::user, state};
 use axum::extract::{
     Json, Path, State,
@@ -40,12 +41,46 @@ pub async fn get(uid: Result<Path<user::UserId>, PathRejection>) -> String {
     put,
     path="/users",
     responses(
-        (status = CREATED, description = "Create a new user")
+        (status = CREATED, description = "User was created", body = user::UserId),
+        (status = CONFLICT, description = "User with that name already exists"),
+        (status = BAD_REQUEST, description = "Invalid request body", body = String),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal Server Error", body = String),
     ),
-    request_body(content = user::User)
+    request_body(content = CreateUser)
 )]
-pub async fn put(user: Result<Json<user::User>, JsonRejection>) -> String {
-    format!("{}", 65535)
+pub async fn put(
+    State(state): State<state::AppState>,
+    user: Result<Json<CreateUser>, JsonRejection>,
+) -> Response {
+    let user = match user {
+        Ok(Json(u)) => u,
+        Err(e) => return (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+    };
+    let mut db = state.db.lock().unwrap();
+    let id = match db.users.insert(user) {
+        Ok(id) => id,
+        Err(InsertUserError::DuplicateName(name)) => {
+            return (
+                StatusCode::CONFLICT,
+                format!("User with name '{name}' already exists"),
+            )
+                .into_response();
+        }
+        Err(InsertUserError::NoAvailableIds) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "No available user IDs".to_string(),
+            )
+                .into_response();
+        }
+        Err(InsertUserError::Password(e)) => {
+            return (StatusCode::BAD_REQUEST, e.to_string()).into_response();
+        }
+    };
+    if let Err(e) = db.users.save() {
+        return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response();
+    }
+    (StatusCode::CREATED, Json(id)).into_response()
 }
 
 #[utoipa::path(

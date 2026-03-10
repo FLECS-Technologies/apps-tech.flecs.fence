@@ -28,6 +28,7 @@ impl Modify for Security {
 #[openapi(
     modifiers(&Security),
     paths(
+        rest::users::put,
         rest::users::get_super_admin,
         rest::users::post_super_admin,
         rest::auth::meta::get_jwk,
