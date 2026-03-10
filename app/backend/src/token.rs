@@ -1,10 +1,15 @@
+use anyhow::Context;
 use jsonwebtoken::{Algorithm, EncodingKey};
 use oxide_auth::primitives::grant::Grant;
 use oxide_auth::primitives::issuer::{IssuedToken, TokenType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::ops::Add;
+use std::sync::{Arc, Mutex};
 use thiserror::Error;
+
+use crate::model::user::UserId;
+use crate::persist;
 
 const TOKEN_DURATION: chrono::Duration = chrono::Duration::days(1);
 
@@ -37,23 +42,34 @@ pub fn issue(
     issuer: url::Url,
     kid: Option<String>,
     encoding_key: &EncodingKey,
-) -> Result<IssuedToken, jsonwebtoken::errors::Error> {
+    db: Arc<Mutex<persist::Db>>,
+) -> Result<IssuedToken, anyhow::Error> {
     // TODO: Check if grant expires earlier
     let until = chrono::Utc::now().add(TOKEN_DURATION);
+    let uid: UserId = grant
+        .owner_id
+        .parse()
+        .with_context(|| format!("owner_id = {}", grant.owner_id))?;
+    let db = db.lock().unwrap();
+    let user = db
+        .users
+        .query_by_uid(uid)
+        .ok_or_else(|| anyhow::anyhow!("Unknown user id {uid}"))?;
+    let user_groups: Vec<_> = user.groups.iter().cloned().collect();
+    let groups = db.groups.query_groups_with_subgroups(&user_groups);
+    let roles: Vec<String> = groups.iter().map(|g| g.as_ref().to_string()).collect();
     let claims = Claims {
         sub: grant.owner_id,
         exp: until.timestamp() as u64,
         iss: issuer,
         email: "test@flecs.local".to_string(),
-        aud: vec!["flecs-core-api".to_string()],
-        preferred_username: "Super Admin".to_string(),
+        aud: vec!["flecs-core-api".to_string(), "fence-api".to_string()],
+        preferred_username: user.name.clone(),
         realm_access: RealmAccess {
-            roles: vec!["tech.flecs.core.admin".to_string()],
+            roles: roles.clone(),
         },
         resource_access: ResourceAccess {
-            account: Account {
-                roles: vec!["tech.flecs.core.admin".to_string()],
-            },
+            account: Account { roles },
         },
     };
 

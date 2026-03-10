@@ -92,7 +92,7 @@ pub async fn post_login(
 
     /* create new user-session and tie it to the user's uid */
     /* @todo add granted scope to user session */
-    let user_session = UserSession::new(user.uid);
+    let user_session = UserSession::new(user.id);
 
     let cookie = Cookie::build(("sid", user_session.get_sid()))
         .path("/")

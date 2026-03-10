@@ -21,14 +21,15 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(enforcer: casbin::Enforcer) -> Self {
+        let db = Arc::new(Mutex::new(persist::Db::default()));
         Self {
             registrar: Arc::new(Mutex::new(build_registrar())),
             authorizer: Arc::new(Mutex::new(Authorizer::new(RandomGenerator::new(16)))),
-            issuer: Arc::new(Mutex::new(Issuer::new())),
+            issuer: Arc::new(Mutex::new(Issuer::new(db.clone()))),
             enforcer: Arc::new(Mutex::new(enforcer)),
             login_sessions: Arc::new(Mutex::new(HashSet::new())),
             user_sessions: Arc::new(Mutex::new(HashSet::new())),
-            db: Arc::new(Mutex::new(persist::Db::default())),
+            db,
         }
     }
 }

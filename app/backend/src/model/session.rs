@@ -6,7 +6,7 @@ use std::{
 
 use uuid::Uuid;
 
-use crate::model::user::Uid;
+use crate::model::user::UserId;
 
 const LOGIN_SESSION_EXPIRY: Duration = Duration::from_secs(5 * 60);
 
@@ -56,7 +56,7 @@ impl LoginSession {
 #[derive(Eq)]
 pub struct UserSession {
     sid: String,
-    uid: Uid,
+    uid: UserId,
 }
 
 impl PartialEq for UserSession {
@@ -78,7 +78,7 @@ impl Borrow<str> for UserSession {
 }
 
 impl UserSession {
-    pub fn new(uid: Uid) -> Self {
+    pub fn new(uid: UserId) -> Self {
         Self {
             sid: new_sid(),
             uid,
@@ -89,7 +89,7 @@ impl UserSession {
         &self.sid
     }
 
-    pub fn get_uid(&self) -> Uid {
+    pub fn get_uid(&self) -> UserId {
         self.uid
     }
 }

@@ -25,10 +25,10 @@ pub async fn get_all(State(state): State<state::AppState>) -> &'static str {
         (status = OK, description = "Return a single user by its uid")
     ),
     params(
-        ("uid" = user::Uid, description = "User ID to query")
+        ("uid" = user::UserId, description = "User ID to query")
     )
 )]
-pub async fn get(uid: Result<Path<user::Uid>, PathRejection>) -> String {
+pub async fn get(uid: Result<Path<user::UserId>, PathRejection>) -> String {
     if let Err(PathRejection::FailedToDeserializePathParams(_)) = uid {
         return "400 Bad Request".to_string();
     }
