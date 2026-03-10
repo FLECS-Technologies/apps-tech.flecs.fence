@@ -6,6 +6,11 @@ use futures_util::StreamExt;
 use tower_http::services::ServeDir;
 use user_manager::state;
 
+#[cfg(debug_assertions)]
+const DEFAULT_LOG_LEVEL: &str = "debug";
+#[cfg(not(debug_assertions))]
+const DEFAULT_LOG_LEVEL: &str = "warn";
+
 async fn signal_handler() {
     let mut signals = Signals::new([Signal::Term, Signal::Int]).unwrap();
 
@@ -18,9 +23,9 @@ async fn signal_handler() {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_env("RUST_LOG"))
-        .init();
+    let filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(DEFAULT_LOG_LEVEL));
+    tracing_subscriber::fmt().with_env_filter(filter).init();
 
     let enforcer = state::construct_enforcer().await.unwrap();
     let app_state = state::AppState::new(enforcer);
