@@ -64,6 +64,24 @@ paths:
             text/plain:
               schema:
                 type: string
+  /users/self:
+    delete:
+      tags:
+      - rest::users
+      operationId: delete_self
+      responses:
+        '204':
+          description: User was deleted
+        '401':
+          description: Not authenticated
+        '403':
+          description: Cannot delete the super admin
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
   /users/super-admin:
     get:
       tags:

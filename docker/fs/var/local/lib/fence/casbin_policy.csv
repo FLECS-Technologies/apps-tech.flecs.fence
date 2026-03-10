@@ -9,6 +9,7 @@ p,*,/oauth,*
 p,*,/oauth/*,*
 p,tech.flecs.fence.create_user,/users,PUT
 p,tech.flecs.fence.delete_user,/users/:uid,DELETE
+p,*,/users/self,DELETE
 
 #g,role,inherited_role
 g,tech.flecs.admin,tech.flecs.fence.admin
