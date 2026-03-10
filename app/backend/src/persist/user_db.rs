@@ -17,6 +17,14 @@ pub enum InsertUserError {
     Password(#[from] HashError),
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum RemoveUserError {
+    #[error("User with id {0} does not exist")]
+    NotFound(UserId),
+    #[error("Cannot delete the super admin")]
+    SuperAdmin,
+}
+
 pub struct UserDB {
     path: PathBuf,
     users: HashMap<UserId, User>,
@@ -61,6 +69,16 @@ impl UserDB {
         };
         self.users.insert(id, user);
         Ok(id)
+    }
+
+    pub fn remove(&mut self, uid: UserId) -> Result<(), RemoveUserError> {
+        if uid == SUPER_ADMIN_ID {
+            return Err(RemoveUserError::SuperAdmin);
+        }
+        self.users
+            .remove(&uid)
+            .map(|_| ())
+            .ok_or(RemoveUserError::NotFound(uid))
     }
 
     pub fn set_super_admin(&mut self, super_admin: SuperAdmin) -> anyhow::Result<Option<User>> {

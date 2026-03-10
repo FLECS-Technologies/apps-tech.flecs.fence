@@ -23,7 +23,10 @@ pub fn build_router(state: AppState) -> Router {
             "/users/super-admin",
             get(rest::users::get_super_admin).post(rest::users::post_super_admin),
         )
-        .route("/users/{uid}", get(rest::users::get))
+        .route(
+            "/users/{uid}",
+            get(rest::users::get).delete(rest::users::delete),
+        )
         .nest("/oauth", crate::oauth::routes::build_router())
         .layer(
             CorsLayer::new()

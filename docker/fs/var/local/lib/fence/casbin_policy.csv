@@ -8,6 +8,7 @@ p,*,/meta/jwk,GET
 p,*,/oauth,*
 p,*,/oauth/*,*
 p,tech.flecs.fence.create_user,/users,PUT
+p,tech.flecs.fence.delete_user,/users/:uid,DELETE
 
 #g,role,inherited_role
 g,tech.flecs.admin,tech.flecs.fence.admin
@@ -16,3 +17,4 @@ g,tech.flecs.technician,tech.flecs.fence.technician
 g,tech.flecs.operator,tech.flecs.fence.operator
 
 g,tech.flecs.fence.admin,tech.flecs.fence.create_user
+g,tech.flecs.fence.admin,tech.flecs.fence.delete_user
