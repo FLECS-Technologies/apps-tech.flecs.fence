@@ -7,3 +7,9 @@ p,*,/meta/issuer,GET
 p,*,/meta/jwk,GET
 p,*,/oauth,*
 p,*,/oauth/*,*
+
+#g,role,inherited_role
+g,tech.flecs.fence.admin,tech.flecs.admin
+g,tech.flecs.fence.developer,tech.flecs.developer
+g,tech.flecs.fence.technician,tech.flecs.technician
+g,tech.flecs.fence.operator,tech.flecs.operator
