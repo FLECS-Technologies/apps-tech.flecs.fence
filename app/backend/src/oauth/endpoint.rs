@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD as b64url;
 use jsonwebtoken::jwk::{
@@ -11,16 +13,19 @@ use oxide_auth::primitives::issuer::{IssuedToken, RefreshedToken};
 use oxide_auth::primitives::prelude::RandomGenerator;
 use tracing::{debug, error, warn};
 
+use crate::persist;
+
 pub type Authorizer = AuthMap<RandomGenerator>;
 
 pub struct Issuer {
     pub jwk: jsonwebtoken::jwk::Jwk,
     pub encoding_key: jsonwebtoken::EncodingKey,
     pub url: url::Url,
+    db: Arc<Mutex<persist::Db>>,
 }
 
 impl Issuer {
-    pub fn new() -> Self {
+    pub fn new(db: Arc<Mutex<persist::Db>>) -> Self {
         let rsa = Rsa::generate(2048).unwrap();
         let pkey = PKey::from_rsa(rsa).unwrap();
         let private_key: Vec<u8> = pkey.private_key_to_pem_pkcs8().unwrap();
@@ -46,6 +51,7 @@ impl Issuer {
             url: url::Url::parse("http://fence.flecs.local").unwrap(),
             jwk,
             encoding_key,
+            db,
         }
     }
 }
@@ -57,6 +63,7 @@ impl oxide_auth::primitives::issuer::Issuer for Issuer {
             self.url.clone(),
             self.jwk.common.key_id.clone(),
             &self.encoding_key,
+            self.db.clone(),
         ) {
             Ok(token) => {
                 debug!("Created token");
