@@ -3,7 +3,7 @@ pub mod user_db;
 
 use std::fs::{self, File};
 use std::io::{BufReader, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use serde::{Serialize, de::DeserializeOwned};
@@ -17,14 +17,15 @@ pub struct Db {
     pub users: UserDB,
 }
 
-impl Default for Db {
-    fn default() -> Self {
-        Self {
-            groups: GroupDB::new("/var/local/lib/fence/groups.json".into()).unwrap(),
-            users: UserDB::new("/var/local/lib/fence/users.json".into()).unwrap(),
-        }
+impl Db {
+    pub fn new(users_path: PathBuf, groups_path: PathBuf) -> anyhow::Result<Self> {
+        Ok(Self {
+            groups: GroupDB::new(groups_path)?,
+            users: UserDB::new(users_path)?,
+        })
     }
 }
+
 
 pub fn load_from_file<T>(path: &Path) -> Result<T>
 where

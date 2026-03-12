@@ -25,7 +25,7 @@ pub struct Issuer {
 }
 
 impl Issuer {
-    pub fn new(db: Arc<Mutex<persist::Db>>) -> Self {
+    pub fn new(db: Arc<Mutex<persist::Db>>, issuer_url: url::Url) -> Self {
         let rsa = Rsa::generate(2048).unwrap();
         let pkey = PKey::from_rsa(rsa).unwrap();
         let private_key: Vec<u8> = pkey.private_key_to_pem_pkcs8().unwrap();
@@ -48,7 +48,7 @@ impl Issuer {
             }),
         };
         Self {
-            url: url::Url::parse("http://fence.flecs.local").unwrap(),
+            url: issuer_url,
             jwk,
             encoding_key,
             db,
