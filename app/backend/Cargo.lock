@@ -2402,6 +2402,7 @@ dependencies = [
  "cookie",
  "futures-util",
  "http",
+ "http-body-util",
  "jsonwebtoken",
  "openssl",
  "oxide-auth",
