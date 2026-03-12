@@ -150,28 +150,6 @@ pub struct PasswordPolicy {
 impl PasswordPolicy {
     pub const MIN_LENGTH: u32 = 12;
     pub const MAX_LENGTH: u32 = 63;
-
-    fn new(
-        len_min: u32,
-        len_max: u32,
-        need_lower: bool,
-        need_upper: bool,
-        need_digit: bool,
-        need_special: bool,
-    ) -> Result<Self, ()> {
-        if len_min > len_max {
-            Err(())
-        } else {
-            Ok(Self {
-                len_min,
-                len_max,
-                need_lower,
-                need_upper,
-                need_digit,
-                need_special,
-            })
-        }
-    }
 }
 
 impl Default for PasswordPolicy {
