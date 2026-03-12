@@ -1,7 +1,7 @@
 use crate::model::user;
 use crate::persist::user_db::RemoveUserError;
 use crate::state;
-use axum::extract::{Path, State, rejection::PathRejection};
+use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
@@ -15,12 +15,8 @@ use axum::response::{IntoResponse, Response};
         ("uid" = user::UserId, description = "User ID to query")
     )
 )]
-pub async fn get(uid: Result<Path<user::UserId>, PathRejection>) -> String {
-    if let Err(PathRejection::FailedToDeserializePathParams(_)) = uid {
-        return "400 Bad Request".to_string();
-    }
-
-    format!("{}", *uid.unwrap())
+pub async fn get(State(state): State<state::AppState>, Path(uid): Path<user::UserId>) -> String {
+    format!("{}", uid)
 }
 
 #[utoipa::path(
@@ -39,12 +35,8 @@ pub async fn get(uid: Result<Path<user::UserId>, PathRejection>) -> String {
 )]
 pub async fn delete(
     State(state): State<state::AppState>,
-    uid: Result<Path<user::UserId>, PathRejection>,
+    Path(uid): Path<user::UserId>,
 ) -> Response {
-    let uid = match uid {
-        Ok(Path(uid)) => uid,
-        Err(e) => return (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
-    };
     let mut db = state.db.lock().unwrap();
     match db.users.remove(uid) {
         Ok(()) => {

@@ -2,7 +2,7 @@ use askama::Template;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::Html;
 use axum::{
-    extract::{Form, State, rejection::FormRejection},
+    extract::{Form, State},
     response::{IntoResponse, Redirect},
 };
 use cookie::Cookie;
@@ -45,17 +45,8 @@ pub async fn get() -> impl IntoResponse {
 pub async fn post(
     State(state): State<state::AppState>,
     headers: HeaderMap,
-    payload: Result<Form<LoginRequest>, FormRejection>,
+    Form(payload): Form<LoginRequest>,
 ) -> impl IntoResponse {
-    /* validate payload */
-    if payload.is_err() {
-        let html = LoginTemplate {
-            error: Some("Invalid form data"),
-        };
-        return Err((StatusCode::FORBIDDEN, Html(html.render().unwrap())));
-    }
-    let payload = payload.unwrap();
-
     /* verify username/password */
     let db = state.db.lock().unwrap();
     let user = db.users.query_by_name(&payload.username);

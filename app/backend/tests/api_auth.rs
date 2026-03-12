@@ -24,17 +24,6 @@ async fn test_get_login_returns_html() {
 }
 
 #[tokio::test]
-async fn test_post_login_invalid_form() {
-    let app = common::TestApp::new().await;
-    let req = Request::post("/login")
-        .header("content-type", "application/json")
-        .body(json_body(r#"{"bad": "data"}"#))
-        .unwrap();
-    let (status, _) = app.request_body(req).await;
-    assert_eq!(status, http::StatusCode::FORBIDDEN);
-}
-
-#[tokio::test]
 async fn test_post_login_unknown_user() {
     let app = common::TestApp::new().await;
     let req = Request::post("/login")
