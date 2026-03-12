@@ -2,7 +2,7 @@ use crate::model::user;
 use crate::model::user::{CreateUser, UserSummary};
 use crate::persist::user_db::InsertUserError;
 use crate::state;
-use axum::extract::{Json, State, rejection::JsonRejection};
+use axum::extract::{Json, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
@@ -34,14 +34,7 @@ pub async fn get(State(state): State<state::AppState>) -> Json<Vec<UserSummary>>
     ),
     request_body(content = CreateUser)
 )]
-pub async fn put(
-    State(state): State<state::AppState>,
-    user: Result<Json<CreateUser>, JsonRejection>,
-) -> Response {
-    let user = match user {
-        Ok(Json(u)) => u,
-        Err(e) => return (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
-    };
+pub async fn put(State(state): State<state::AppState>, Json(user): Json<CreateUser>) -> Response {
     let mut db = state.db.lock().unwrap();
     let id = match db.users.insert(user) {
         Ok(id) => id,
