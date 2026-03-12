@@ -134,6 +134,28 @@ paths:
               schema:
                 type: string
   /users/{uid}:
+    get:
+      tags:
+      - rest::users::uid
+      operationId: get
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to query
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      responses:
+        '200':
+          description: Return a single user by its uid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
+        '400':
+          description: Invalid user ID
+        '404':
+          description: User does not exist
     delete:
       tags:
       - rest::users::uid

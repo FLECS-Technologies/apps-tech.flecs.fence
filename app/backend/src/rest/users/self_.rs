@@ -1,7 +1,7 @@
-use crate::model::user::UserId;
 use crate::persist::user_db::RemoveUserError;
 use crate::state;
 use crate::token::Subject;
+use axum::Extension;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
