@@ -47,9 +47,9 @@ async fn test_delete_self_success() {
     let req = Request::put("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {admin_token}"))
-        .body(json_body(
-            &format!(r#"{{"name": "selfdelete", "password": "{VALID_PASSWORD}", "groups": []}}"#),
-        ))
+        .body(json_body(&format!(
+            r#"{{"name": "selfdelete", "password": "{VALID_PASSWORD}", "groups": []}}"#
+        )))
         .unwrap();
     let (status, body) = app.request_body(req).await;
     assert_eq!(status, http::StatusCode::CREATED);

@@ -17,9 +17,7 @@ fn load_users_from_disk(path: &Path) -> Vec<serde_json::Value> {
 const VALID_PASSWORD: &str = "TestPassword123";
 
 fn super_admin_json() -> String {
-    format!(
-        r#"{{"name": "admin", "full_name": "Super Admin", "password": "{VALID_PASSWORD}"}}"#
-    )
+    format!(r#"{{"name": "admin", "full_name": "Super Admin", "password": "{VALID_PASSWORD}"}}"#)
 }
 
 #[tokio::test]
@@ -118,9 +116,9 @@ async fn test_put_user_requires_auth() {
     let app = common::TestApp::new().await;
     let req = Request::put("/users")
         .header("content-type", "application/json")
-        .body(json_body(
-            &format!(r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#),
-        ))
+        .body(json_body(&format!(
+            r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#
+        )))
         .unwrap();
     let (status, _) = app.request_body(req).await;
     assert_eq!(status, http::StatusCode::FORBIDDEN);
@@ -143,9 +141,9 @@ async fn test_put_user_with_auth() {
     let req = Request::put("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
-        .body(json_body(
-            &format!(r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#),
-        ))
+        .body(json_body(&format!(
+            r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#
+        )))
         .unwrap();
     let (status, body) = app.request_body(req).await;
     assert_eq!(status, http::StatusCode::CREATED, "body: {body}");
@@ -182,7 +180,8 @@ async fn test_put_user_duplicate_name() {
     app.request(req).await;
 
     let token = app.mint_token(0);
-    let user_json = format!(r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#);
+    let user_json =
+        format!(r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#);
 
     // Create user
     let req = Request::put("/users")
@@ -219,9 +218,9 @@ async fn test_delete_user() {
     let req = Request::put("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
-        .body(json_body(
-            &format!(r#"{{"name": "to_delete", "password": "{VALID_PASSWORD}", "groups": []}}"#),
-        ))
+        .body(json_body(&format!(
+            r#"{{"name": "to_delete", "password": "{VALID_PASSWORD}", "groups": []}}"#
+        )))
         .unwrap();
     let (status, body) = app.request_body(req).await;
     assert_eq!(status, http::StatusCode::CREATED);
