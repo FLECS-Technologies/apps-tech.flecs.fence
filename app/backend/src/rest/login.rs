@@ -12,8 +12,6 @@ use utoipa::ToSchema;
 use crate::model::session::UserSession;
 use crate::state;
 
-pub mod meta;
-
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct LoginRequest {
     username: String,
@@ -40,11 +38,11 @@ struct LoginTemplate<'a> {
     )
 )]
 
-pub async fn get_login() -> impl IntoResponse {
+pub async fn get() -> impl IntoResponse {
     Html(LoginTemplate { error: None }.render().unwrap())
 }
 
-pub async fn post_login(
+pub async fn post(
     State(state): State<state::AppState>,
     headers: HeaderMap,
     payload: Result<Form<LoginRequest>, FormRejection>,

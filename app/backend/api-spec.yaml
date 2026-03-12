@@ -13,7 +13,7 @@ paths:
     get:
       tags:
       - Experimental
-      operationId: get_issuer
+      operationId: get
       responses:
         '200':
           description: Issuer that issues auth tokens
@@ -25,7 +25,7 @@ paths:
     get:
       tags:
       - Experimental
-      operationId: get_jwk
+      operationId: get
       responses:
         '200':
           description: Jwk that has to be used to verify issued tokens
@@ -36,7 +36,7 @@ paths:
     get:
       tags:
       - rest::users
-      operationId: get_all
+      operationId: get
       responses:
         '200':
           description: List of all users
@@ -80,8 +80,8 @@ paths:
   /users/self:
     delete:
       tags:
-      - rest::users
-      operationId: delete_self
+      - rest::users::self_
+      operationId: delete
       responses:
         '204':
           description: User was deleted
@@ -99,7 +99,7 @@ paths:
     get:
       tags:
       - Experimental
-      operationId: get_super_admin
+      operationId: get
       responses:
         '204':
           description: Super admin exists
@@ -108,7 +108,7 @@ paths:
     post:
       tags:
       - Experimental
-      operationId: post_super_admin
+      operationId: post
       requestBody:
         description: The super admin that should be set
         content:
@@ -136,7 +136,7 @@ paths:
   /users/{uid}:
     delete:
       tags:
-      - rest::users
+      - rest::users::uid
       operationId: delete
       parameters:
       - name: uid
