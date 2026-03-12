@@ -202,6 +202,64 @@ async fn test_put_user_duplicate_name() {
 }
 
 #[tokio::test]
+async fn test_get_user_by_uid() {
+    let app = common::TestApp::new().await;
+
+    // Create super admin
+    let req = Request::post("/users/super-admin")
+        .header("content-type", "application/json")
+        .body(json_body(&super_admin_json()))
+        .unwrap();
+    app.request(req).await;
+
+    let token = app.mint_token(0);
+
+    // Get super admin by uid
+    let req = Request::get("/users/0")
+        .header("authorization", format!("Bearer {token}"))
+        .body(axum::body::Body::empty())
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::OK);
+
+    let user: serde_json::Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(user["id"], 0);
+    assert_eq!(user["name"], "admin");
+}
+
+#[tokio::test]
+async fn test_get_user_by_uid_not_found() {
+    let app = common::TestApp::new().await;
+
+    // Create super admin
+    let req = Request::post("/users/super-admin")
+        .header("content-type", "application/json")
+        .body(json_body(&super_admin_json()))
+        .unwrap();
+    app.request(req).await;
+
+    let token = app.mint_token(0);
+
+    // Query non-existent user
+    let req = Request::get("/users/999")
+        .header("authorization", format!("Bearer {token}"))
+        .body(axum::body::Body::empty())
+        .unwrap();
+    let (status, _) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn test_get_user_by_uid_requires_auth() {
+    let app = common::TestApp::new().await;
+    let req = Request::get("/users/0")
+        .body(axum::body::Body::empty())
+        .unwrap();
+    let (status, _) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::FORBIDDEN);
+}
+
+#[tokio::test]
 async fn test_delete_user() {
     let app = common::TestApp::new().await;
 

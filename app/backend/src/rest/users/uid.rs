@@ -1,7 +1,8 @@
 use crate::model::user;
+use crate::model::user::UserSummary;
 use crate::persist::user_db::RemoveUserError;
 use crate::state;
-use axum::extract::{Path, State};
+use axum::extract::{Json, Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
@@ -9,14 +10,20 @@ use axum::response::{IntoResponse, Response};
     get,
     path="/users/{uid}",
     responses(
-        (status = OK, description = "Return a single user by its uid")
+        (status = OK, description = "Return a single user by its uid", body = UserSummary),
+        (status = NOT_FOUND, description = "User does not exist"),
+        (status = BAD_REQUEST, description = "Invalid user ID"),
     ),
     params(
         ("uid" = user::UserId, description = "User ID to query")
     )
 )]
-pub async fn get(State(state): State<state::AppState>, Path(uid): Path<user::UserId>) -> String {
-    format!("{}", uid)
+pub async fn get(State(state): State<state::AppState>, Path(uid): Path<user::UserId>) -> Response {
+    let db = state.db.lock().unwrap();
+    match db.users.query_by_uid(uid) {
+        Some(user) => Json(UserSummary::from(user)).into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
 }
 
 #[utoipa::path(
