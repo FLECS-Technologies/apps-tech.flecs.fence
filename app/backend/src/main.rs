@@ -27,8 +27,14 @@ async fn main() {
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(DEFAULT_LOG_LEVEL));
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    let enforcer = state::construct_enforcer().await.unwrap();
-    let app_state = state::AppState::new(enforcer);
+    let config = user_manager::config::Config::default();
+    let enforcer = state::construct_enforcer(
+        config.auth.casbin_model_path.clone(),
+        config.auth.casbin_policy_path.clone(),
+    )
+    .await
+    .unwrap();
+    let app_state = state::AppState::new(enforcer, &config);
     let router = build_router(app_state).fallback_service(ServeDir::new("./static"));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:27000")
