@@ -51,6 +51,10 @@ impl LoginSession {
     pub fn get_q(&self) -> &str {
         &self.q
     }
+
+    pub fn is_expired(&self) -> bool {
+        self.expire_at < Instant::now()
+    }
 }
 
 #[derive(Eq)]
@@ -102,4 +106,29 @@ impl Default for UserSession {
 
 fn new_sid() -> String {
     Uuid::new_v4().as_simple().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn login_session_with_future_expiry_is_not_expired() {
+        let session = LoginSession {
+            sid: new_sid(),
+            q: "q=test".into(),
+            expire_at: Instant::now() + Duration::from_secs(60),
+        };
+        assert!(!session.is_expired());
+    }
+
+    #[test]
+    fn login_session_with_past_expiry_is_expired() {
+        let session = LoginSession {
+            sid: new_sid(),
+            q: "q=test".into(),
+            expire_at: Instant::now() - Duration::from_secs(1),
+        };
+        assert!(session.is_expired());
+    }
 }
