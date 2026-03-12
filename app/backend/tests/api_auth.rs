@@ -59,7 +59,9 @@ async fn test_post_login_wrong_password() {
 
     let req = Request::post("/login")
         .header("content-type", "application/x-www-form-urlencoded")
-        .body(axum::body::Body::from("username=admin&password=WrongPassword"))
+        .body(axum::body::Body::from(
+            "username=admin&password=WrongPassword",
+        ))
         .unwrap();
     let (status, body) = app.request_body(req).await;
     assert_eq!(status, http::StatusCode::FORBIDDEN);
@@ -85,8 +87,16 @@ async fn test_post_login_success() {
         .unwrap();
     let response = app.request(req).await;
     assert_eq!(response.status(), http::StatusCode::OK);
-    let set_cookie = response.headers().get("set-cookie").unwrap().to_str().unwrap();
-    assert!(set_cookie.contains("sid="), "Expected session cookie to be set");
+    let set_cookie = response
+        .headers()
+        .get("set-cookie")
+        .unwrap()
+        .to_str()
+        .unwrap();
+    assert!(
+        set_cookie.contains("sid="),
+        "Expected session cookie to be set"
+    );
 }
 
 #[tokio::test]

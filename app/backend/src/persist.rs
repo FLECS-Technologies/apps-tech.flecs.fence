@@ -26,7 +26,6 @@ impl Db {
     }
 }
 
-
 pub fn load_from_file<T>(path: &Path) -> Result<T>
 where
     T: DeserializeOwned + Default,
