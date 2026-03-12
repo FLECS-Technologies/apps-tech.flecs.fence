@@ -90,6 +90,21 @@ pub async fn post_login(
         None => None,
     };
 
+    if let Some(login_session) = &login_session
+        && login_session.is_expired()
+    {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Html(
+                LoginTemplate {
+                    error: Some("Session expired"),
+                }
+                .render()
+                .unwrap(),
+            ),
+        ));
+    }
+
     /* create new user-session and tie it to the user's uid */
     /* @todo add granted scope to user session */
     let user_session = UserSession::new(user.id);
