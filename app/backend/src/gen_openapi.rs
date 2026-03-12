@@ -28,14 +28,14 @@ impl Modify for Security {
 #[openapi(
     modifiers(&Security),
     paths(
-        rest::users::get_all,
+        rest::users::get,
         rest::users::put,
-        rest::users::delete,
-        rest::users::delete_self,
-        rest::users::get_super_admin,
-        rest::users::post_super_admin,
-        rest::auth::meta::get_jwk,
-        rest::auth::meta::get_issuer,
+        rest::users::uid::delete,
+        rest::users::self_::delete,
+        rest::users::super_admin::get,
+        rest::users::super_admin::post,
+        rest::meta::jwk::get,
+        rest::meta::issuer::get,
     ),
     // Top-level security requirement (applies to every operation by default)
     security(

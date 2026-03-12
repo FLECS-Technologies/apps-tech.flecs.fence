@@ -15,7 +15,7 @@ pub struct RedirectQuery {
     redirect_uri: Option<String>,
 }
 
-pub async fn get_authorize(
+pub async fn get(
     State(state): State<AppState>,
     RawQuery(raw_query): RawQuery,
     headers: HeaderMap,
@@ -80,30 +80,6 @@ pub async fn get_authorize(
 
     let resp = ep.authorization_flow().execute(req);
 
-    match resp {
-        Ok(r) => r.into_response(),
-        Err(e) => {
-            debug!("{:#?}", e);
-            (StatusCode::BAD_REQUEST, "Invalid OAuth request").into_response()
-        }
-    }
-}
-
-pub async fn post_token(State(state): State<AppState>, req: OAuthRequest) -> impl IntoResponse {
-    let mut registrar = state.registrar.lock().unwrap();
-    let mut authorizer = state.authorizer.lock().unwrap();
-    let mut issuer = state.issuer.lock().unwrap();
-
-    let ep = oxide_auth::frontends::simple::endpoint::Generic {
-        registrar: &mut *registrar,
-        authorizer: &mut *authorizer,
-        issuer: &mut *issuer,
-        solicitor: Vacant,
-        scopes: Vacant,
-        response: Vacant,
-    };
-    debug!("Triggering access_token_flow()");
-    let resp = ep.access_token_flow().execute(req);
     match resp {
         Ok(r) => r.into_response(),
         Err(e) => {
