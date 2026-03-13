@@ -13,7 +13,6 @@ pub fn build_router(state: AppState) -> Router {
     let verify_roles_middleware =
         axum::middleware::from_fn_with_state(state.clone(), crate::middleware::role::middleware);
     Router::new()
-        .route("/", get(|| async { "Hello World!" }))
         .route("/login", get(rest::login::get))
         .route("/login", post(rest::login::post))
         .route("/meta/issuer", get(rest::meta::issuer::get))
