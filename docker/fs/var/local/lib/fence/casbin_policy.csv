@@ -11,6 +11,10 @@ p,tech.flecs.fence.list_users,/users,GET
 p,tech.flecs.fence.create_user,/users,PUT
 p,tech.flecs.fence.list_users,/users/:uid,GET
 p,tech.flecs.fence.delete_user,/users/:uid,DELETE
+p,tech.flecs.fence.assign_roles,/users/:uid/roles,PUT
+p,tech.flecs.fence.assign_roles,/users/:uid/roles,GET
+p,tech.flecs.fence.assign_roles,/users/:uid/roles/:role,PUT
+p,tech.flecs.fence.assign_roles,/users/:uid/roles/:role,DELETE
 p,*,/users/self,DELETE
 
 #g,role,inherited_role
@@ -21,4 +25,5 @@ g,tech.flecs.operator,tech.flecs.fence.operator
 
 g,tech.flecs.fence.admin,tech.flecs.fence.create_user
 g,tech.flecs.fence.admin,tech.flecs.fence.delete_user
+g,tech.flecs.fence.admin,tech.flecs.fence.assign_roles
 g,tech.flecs.fence.admin,tech.flecs.fence.list_users
