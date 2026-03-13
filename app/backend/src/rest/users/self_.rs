@@ -18,12 +18,9 @@ use axum::response::{IntoResponse, Response};
 )]
 pub async fn delete(
     State(state): State<state::AppState>,
-    request: axum::extract::Request,
+    subject: Option<Extension<Subject>>,
 ) -> Response {
-    let Some(subject) = request.extensions().get::<Subject>() else {
-        return StatusCode::UNAUTHORIZED.into_response();
-    };
-    let Ok(uid) = subject.0.parse::<UserId>() else {
+    let Some(Extension(Subject(uid))) = subject else {
         return StatusCode::UNAUTHORIZED.into_response();
     };
     let mut db = state.db.lock().unwrap();
