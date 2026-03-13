@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use tracing::error;
 
+use crate::model::group::GroupId;
 use crate::model::password::{self, HashError};
 use crate::model::user::{CreateUser, SUPER_ADMIN_ID, SuperAdmin, User, UserId};
 
@@ -23,6 +24,28 @@ pub enum RemoveUserError {
     NotFound(UserId),
     #[error("Cannot delete the super admin")]
     SuperAdmin,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum SetGroupsError {
+    #[error("User with id {0} does not exist")]
+    NotFound(UserId),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum AddGroupError {
+    #[error("User with id {0} does not exist")]
+    NotFound(UserId),
+    #[error("User already has role {0}")]
+    AlreadyAssigned(GroupId),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum RemoveGroupError {
+    #[error("User with id {0} does not exist")]
+    NotFound(UserId),
+    #[error("User does not have role {0}")]
+    NotAssigned(GroupId),
 }
 
 pub struct UserDB {
@@ -83,6 +106,41 @@ impl UserDB {
             .remove(&uid)
             .map(|_| ())
             .ok_or(RemoveUserError::NotFound(uid))
+    }
+
+    pub fn set_groups(
+        &mut self,
+        uid: UserId,
+        groups: std::collections::HashSet<GroupId>,
+    ) -> Result<(), SetGroupsError> {
+        let user = self
+            .users
+            .get_mut(&uid)
+            .ok_or(SetGroupsError::NotFound(uid))?;
+        user.groups = groups;
+        Ok(())
+    }
+
+    pub fn add_group(&mut self, uid: UserId, group: GroupId) -> Result<(), AddGroupError> {
+        let user = self
+            .users
+            .get_mut(&uid)
+            .ok_or(AddGroupError::NotFound(uid))?;
+        if !user.groups.insert(group.clone()) {
+            return Err(AddGroupError::AlreadyAssigned(group));
+        }
+        Ok(())
+    }
+
+    pub fn remove_group(&mut self, uid: UserId, group: &GroupId) -> Result<(), RemoveGroupError> {
+        let user = self
+            .users
+            .get_mut(&uid)
+            .ok_or(RemoveGroupError::NotFound(uid))?;
+        if !user.groups.remove(group) {
+            return Err(RemoveGroupError::NotAssigned(group.clone()));
+        }
+        Ok(())
     }
 
     pub fn set_super_admin(&mut self, super_admin: SuperAdmin) -> anyhow::Result<Option<User>> {

@@ -1,7 +1,7 @@
 use crate::{rest, state::AppState};
 use axum::{
     Router,
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
 };
 use tower_http::cors::{Any, CorsLayer};
 
@@ -26,6 +26,14 @@ pub fn build_router(state: AppState) -> Router {
         .route(
             "/users/{uid}",
             get(rest::users::uid::get).delete(rest::users::uid::delete),
+        )
+        .route(
+            "/users/{uid}/roles",
+            get(rest::users::uid::roles::get).put(rest::users::uid::roles::put),
+        )
+        .route(
+            "/users/{uid}/roles/{role}",
+            put(rest::users::uid::roles::role::put).delete(rest::users::uid::roles::role::delete),
         )
         .route("/oauth/authorize", get(rest::oauth::authorize::get))
         .route("/oauth/token", post(rest::oauth::token::post))

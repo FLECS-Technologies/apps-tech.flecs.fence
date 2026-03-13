@@ -4,6 +4,12 @@ use utoipa::ToSchema;
 #[derive(Serialize, Deserialize, PartialEq, Eq, Hash, Clone, Debug, ToSchema)]
 pub struct GroupId(String);
 
+impl std::fmt::Display for GroupId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
 impl AsRef<str> for GroupId {
     fn as_ref(&self) -> &str {
         &self.0

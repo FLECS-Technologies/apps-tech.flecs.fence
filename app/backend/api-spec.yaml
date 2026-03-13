@@ -182,6 +182,128 @@ paths:
             text/plain:
               schema:
                 type: string
+  /users/{uid}/roles:
+    get:
+      tags:
+      - rest::users::uid::roles
+      operationId: get
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to query roles for
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      responses:
+        '200':
+          description: List of roles assigned to the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupId'
+                uniqueItems: true
+        '400':
+          description: Invalid user ID
+        '404':
+          description: User does not exist
+    put:
+      tags:
+      - rest::users::uid::roles
+      operationId: put
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to assign roles to
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/GroupId'
+              uniqueItems: true
+        required: true
+      responses:
+        '204':
+          description: Roles were assigned to the user
+        '400':
+          description: Invalid request body or user ID
+        '404':
+          description: User does not exist
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
+  /users/{uid}/roles/{role}:
+    put:
+      tags:
+      - rest::users::uid::roles::role
+      operationId: put
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to assign the role to
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      - name: role
+        in: path
+        description: Role to assign
+        required: true
+        schema:
+          $ref: '#/components/schemas/GroupId'
+      responses:
+        '204':
+          description: Role was assigned to the user
+        '400':
+          description: Invalid user ID or role
+        '404':
+          description: User does not exist
+        '409':
+          description: User already has this role
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
+    delete:
+      tags:
+      - rest::users::uid::roles::role
+      operationId: delete
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to remove the role from
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      - name: role
+        in: path
+        description: Role to remove
+        required: true
+        schema:
+          $ref: '#/components/schemas/GroupId'
+      responses:
+        '204':
+          description: Role was removed from the user
+        '400':
+          description: Invalid user ID or role
+        '404':
+          description: User does not exist or does not have this role
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
 components:
   schemas:
     CreateUser:
