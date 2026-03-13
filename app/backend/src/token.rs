@@ -17,7 +17,7 @@ const TOKEN_DURATION: chrono::Duration = chrono::Duration::days(1);
 pub struct Roles(pub HashSet<String>);
 
 #[derive(Debug, Clone)]
-pub struct Subject(pub String);
+pub struct Subject(pub UserId);
 
 #[derive(Debug, Serialize, Deserialize)]
 struct RealmAccess {
@@ -103,6 +103,8 @@ pub enum VerifyTokenError {
     NoKeyAlgorithm,
     #[error("Unknown kid '{0}'")]
     UnknownKid(String),
+    #[error("Invalid subject: {0}")]
+    InvalidSubject(#[from] std::num::ParseIntError),
     #[error(transparent)]
     JsonWebToken(#[from] jsonwebtoken::errors::Error),
 }
@@ -148,7 +150,7 @@ pub fn verify(
     validation.set_issuer(&[issuer_url.as_str()]);
     validation.set_required_spec_claims(&["exp", "aud", "iss", "sub"]);
     let claims = jsonwebtoken::decode::<Claims>(token, &decoding_key, &validation)?.claims;
-    let subject = Subject(claims.sub);
+    let subject = Subject(claims.sub.parse::<UserId>()?);
     let roles = Roles(
         claims
             .realm_access
