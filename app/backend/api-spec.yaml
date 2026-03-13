@@ -95,6 +95,35 @@ paths:
             text/plain:
               schema:
                 type: string
+    patch:
+      tags:
+      - rest::users::self_
+      operationId: patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+        required: true
+      responses:
+        '204':
+          description: User was updated
+        '400':
+          description: Invalid request body
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Not authenticated
+        '409':
+          description: User with that name already exists
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
   /users/super-admin:
     get:
       tags:
@@ -176,6 +205,42 @@ paths:
           description: Cannot delete the super admin
         '404':
           description: User does not exist
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
+    patch:
+      tags:
+      - rest::users::uid
+      operationId: patch
+      parameters:
+      - name: uid
+        in: path
+        description: User ID to update
+        required: true
+        schema:
+          $ref: '#/components/schemas/u16'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+        required: true
+      responses:
+        '204':
+          description: User was updated
+        '400':
+          description: Invalid request body or user ID
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: User does not exist
+        '409':
+          description: User with that name already exists
         '500':
           description: Internal Server Error
           content:
@@ -337,6 +402,21 @@ components:
           type: string
         password:
           type: string
+    UpdateUser:
+      type: object
+      properties:
+        full_name:
+          type:
+          - string
+          - 'null'
+        name:
+          type:
+          - string
+          - 'null'
+        password:
+          type:
+          - string
+          - 'null'
     Uri:
       type: string
       format: uri

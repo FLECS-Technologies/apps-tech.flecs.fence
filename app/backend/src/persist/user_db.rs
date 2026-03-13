@@ -4,7 +4,7 @@ use tracing::error;
 
 use crate::model::group::GroupId;
 use crate::model::password::{self, HashError};
-use crate::model::user::{CreateUser, SUPER_ADMIN_ID, SuperAdmin, User, UserId};
+use crate::model::user::{CreateUser, SUPER_ADMIN_ID, SuperAdmin, UpdateUser, User, UserId};
 
 mod versioning;
 
@@ -38,6 +38,16 @@ pub enum AddGroupError {
     NotFound(UserId),
     #[error("User already has role {0}")]
     AlreadyAssigned(GroupId),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum UpdateUserError {
+    #[error("User with id {0} does not exist")]
+    NotFound(UserId),
+    #[error("User with name '{0}' already exists")]
+    DuplicateName(String),
+    #[error("Invalid password: {0}")]
+    Password(#[from] HashError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -139,6 +149,28 @@ impl UserDB {
             .ok_or(RemoveGroupError::NotFound(uid))?;
         if !user.groups.remove(group) {
             return Err(RemoveGroupError::NotAssigned(group.clone()));
+        }
+        Ok(())
+    }
+
+    pub fn update(&mut self, uid: UserId, update: UpdateUser) -> Result<(), UpdateUserError> {
+        if let Some(ref name) = update.name
+            && self.users.values().any(|u| u.id != uid && u.name == *name)
+        {
+            return Err(UpdateUserError::DuplicateName(name.clone()));
+        }
+        let user = self
+            .users
+            .get_mut(&uid)
+            .ok_or(UpdateUserError::NotFound(uid))?;
+        if let Some(plain_password) = update.password {
+            user.password = password::Password::new(&plain_password)?;
+        }
+        if let Some(name) = update.name {
+            user.name = name;
+        }
+        if let Some(full_name) = update.full_name {
+            user.full_name = full_name;
         }
         Ok(())
     }

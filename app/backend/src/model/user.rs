@@ -42,6 +42,13 @@ pub struct CreateUser {
     pub groups: HashSet<GroupId>,
 }
 
+#[derive(Deserialize, ToSchema)]
+pub struct UpdateUser {
+    pub name: Option<String>,
+    pub full_name: Option<String>,
+    pub password: Option<String>,
+}
+
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct SuperAdmin {
     pub name: String,

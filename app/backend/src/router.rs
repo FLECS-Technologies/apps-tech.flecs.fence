@@ -1,7 +1,7 @@
 use crate::{rest, state::AppState};
 use axum::{
     Router,
-    routing::{delete, get, post, put},
+    routing::{get, patch, post, put},
 };
 use tower_http::cors::{Any, CorsLayer};
 
@@ -18,14 +18,19 @@ pub fn build_router(state: AppState) -> Router {
         .route("/meta/issuer", get(rest::meta::issuer::get))
         .route("/meta/jwk", get(rest::meta::jwk::get))
         .route("/users", get(rest::users::get).put(rest::users::put))
-        .route("/users/self", delete(rest::users::self_::delete))
+        .route(
+            "/users/self",
+            patch(rest::users::self_::patch).delete(rest::users::self_::delete),
+        )
         .route(
             "/users/super-admin",
             get(rest::users::super_admin::get).post(rest::users::super_admin::post),
         )
         .route(
             "/users/{uid}",
-            get(rest::users::uid::get).delete(rest::users::uid::delete),
+            get(rest::users::uid::get)
+                .patch(rest::users::uid::patch)
+                .delete(rest::users::uid::delete),
         )
         .route(
             "/users/{uid}/roles",
