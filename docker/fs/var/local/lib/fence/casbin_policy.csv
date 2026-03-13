@@ -16,6 +16,8 @@ p,tech.flecs.fence.assign_roles,/users/:uid/roles,GET
 p,tech.flecs.fence.assign_roles,/users/:uid/roles/:role,PUT
 p,tech.flecs.fence.assign_roles,/users/:uid/roles/:role,DELETE
 p,*,/users/self,DELETE
+p,*,/users/self,PATCH
+p,tech.flecs.fence.update_user,/users/:uid,PATCH
 
 #g,role,inherited_role
 g,tech.flecs.admin,tech.flecs.fence.admin
@@ -27,3 +29,4 @@ g,tech.flecs.fence.admin,tech.flecs.fence.create_user
 g,tech.flecs.fence.admin,tech.flecs.fence.delete_user
 g,tech.flecs.fence.admin,tech.flecs.fence.assign_roles
 g,tech.flecs.fence.admin,tech.flecs.fence.list_users
+g,tech.flecs.fence.admin,tech.flecs.fence.update_user
