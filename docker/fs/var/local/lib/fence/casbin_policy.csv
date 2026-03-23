@@ -18,6 +18,10 @@ p,tech.flecs.fence.assign_roles,/users/:uid/roles/:role,DELETE
 p,*,/users/self,DELETE
 p,*,/users/self,PATCH
 p,tech.flecs.fence.update_user,/users/:uid,PATCH
+p,tech.flecs.fence.create_client,/clients,PUT
+p,tech.flecs.fence.list_clients,/clients,GET
+p,tech.flecs.fence.list_clients,/clients/:cid,GET
+p,tech.flecs.fence.delete_client,/clients/:cid,DELETE
 
 #g,role,inherited_role
 g,tech.flecs.admin,tech.flecs.fence.admin
@@ -30,3 +34,6 @@ g,tech.flecs.fence.admin,tech.flecs.fence.delete_user
 g,tech.flecs.fence.admin,tech.flecs.fence.assign_roles
 g,tech.flecs.fence.admin,tech.flecs.fence.list_users
 g,tech.flecs.fence.admin,tech.flecs.fence.update_user
+g,tech.flecs.fence.admin,tech.flecs.fence.create_client
+g,tech.flecs.fence.admin,tech.flecs.fence.delete_client
+g,tech.flecs.fence.admin,tech.flecs.fence.list_clients

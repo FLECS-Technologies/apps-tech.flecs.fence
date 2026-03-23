@@ -43,6 +43,10 @@ impl Modify for Security {
         rest::users::super_admin::post,
         rest::meta::jwk::get,
         rest::meta::issuer::get,
+        rest::clients::get,
+        rest::clients::put,
+        rest::clients::cid::get,
+        rest::clients::cid::delete,
     ),
     // Top-level security requirement (applies to every operation by default)
     security(

@@ -9,6 +9,100 @@ info:
     identifier: Apache-2.0
   version: 0.2.1
 paths:
+  /clients:
+    get:
+      tags:
+      - rest::clients
+      operationId: get
+      responses:
+        '200':
+          description: List of all clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientSummary'
+    put:
+      tags:
+      - rest::clients
+      operationId: put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClient'
+        required: true
+      responses:
+        '201':
+          description: Client was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateClientResponse'
+        '400':
+          description: Invalid request body
+          content:
+            text/plain:
+              schema:
+                type: string
+        '409':
+          description: Client with that name already exists
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
+  /clients/{cid}:
+    get:
+      tags:
+      - rest::clients::cid
+      operationId: get
+      parameters:
+      - name: cid
+        in: path
+        description: Client UUID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Return a single client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientSummary'
+        '400':
+          description: Invalid client ID
+        '404':
+          description: Client does not exist
+    delete:
+      tags:
+      - rest::clients::cid
+      operationId: delete
+      parameters:
+      - name: cid
+        in: path
+        description: Client UUID
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Client was deleted
+        '400':
+          description: Invalid client ID
+        '403':
+          description: Client is read-only
+        '404':
+          description: Client does not exist
+        '500':
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
   /meta/issuer:
     get:
       tags:
@@ -371,6 +465,100 @@ paths:
                 type: string
 components:
   schemas:
+    ClientSummary:
+      type: object
+      required:
+      - id
+      - name
+      - auth_method
+      - groups
+      - created_at
+      properties:
+        auth_method:
+          type: string
+        created_at:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupId'
+          uniqueItems: true
+        id:
+          type: string
+        name:
+          type: string
+    CreateAuthMethod:
+      oneOf:
+      - type: object
+        required:
+        - type
+        properties:
+          type:
+            type: string
+            enum:
+            - Secret
+      - type: object
+        required:
+        - type
+        properties:
+          pem:
+            type:
+            - string
+            - 'null'
+          type:
+            type: string
+            enum:
+            - Certificate
+    CreateClient:
+      type: object
+      required:
+      - name
+      - auth_method
+      - groups
+      properties:
+        auth_method:
+          $ref: '#/components/schemas/CreateAuthMethod'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupId'
+          uniqueItems: true
+        name:
+          type: string
+    CreateClientResponse:
+      type: object
+      required:
+      - id
+      - name
+      - auth_method
+      - groups
+      - created_at
+      properties:
+        auth_method:
+          type: string
+        certificate:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupId'
+          uniqueItems: true
+        id:
+          type: string
+        name:
+          type: string
+        private_key:
+          type:
+          - string
+          - 'null'
+        secret:
+          type:
+          - string
+          - 'null'
     CreateUser:
       type: object
       required:
