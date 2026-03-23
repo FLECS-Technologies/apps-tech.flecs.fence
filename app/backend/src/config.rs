@@ -9,6 +9,8 @@ pub struct Config {
 pub struct Database {
     pub users_path: PathBuf,
     pub groups_path: PathBuf,
+    pub clients_path: PathBuf,
+    pub ro_clients_path: PathBuf,
 }
 
 pub struct Auth {
@@ -22,6 +24,8 @@ impl Default for Database {
         Self {
             users_path: "/var/local/lib/fence/users.json".into(),
             groups_path: "/var/local/lib/fence/groups.json".into(),
+            clients_path: "/var/local/lib/fence/clients.json".into(),
+            ro_clients_path: "/var/local/lib/fence/ro_clients.json".into(),
         }
     }
 }

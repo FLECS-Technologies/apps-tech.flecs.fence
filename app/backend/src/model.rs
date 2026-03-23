@@ -1,3 +1,4 @@
+pub mod client;
 pub mod group;
 pub mod password;
 pub mod session;

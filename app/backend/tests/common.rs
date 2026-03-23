@@ -35,6 +35,8 @@ impl TestApp {
             database: user_manager::config::Database {
                 users_path: tempdir.path().join("users.json"),
                 groups_path: tempdir.path().join("groups.json"),
+                clients_path: tempdir.path().join("clients.json"),
+                ro_clients_path: tempdir.path().join("ro_clients.json"),
             },
             auth: user_manager::config::Auth {
                 issuer_url: url::Url::parse("http://localhost").unwrap(),

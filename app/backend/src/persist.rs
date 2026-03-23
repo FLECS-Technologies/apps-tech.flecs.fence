@@ -1,3 +1,4 @@
+pub mod client_db;
 pub mod group_db;
 pub mod user_db;
 
@@ -9,17 +10,25 @@ use anyhow::{Context, Result};
 use serde::{Serialize, de::DeserializeOwned};
 use tracing::warn;
 
+use client_db::ClientDB;
 use group_db::GroupDB;
 use user_db::UserDB;
 
 pub struct Db {
+    pub clients: ClientDB,
     pub groups: GroupDB,
     pub users: UserDB,
 }
 
 impl Db {
-    pub fn new(users_path: PathBuf, groups_path: PathBuf) -> anyhow::Result<Self> {
+    pub fn new(
+        users_path: PathBuf,
+        groups_path: PathBuf,
+        clients_path: PathBuf,
+        ro_clients_path: PathBuf,
+    ) -> anyhow::Result<Self> {
         Ok(Self {
+            clients: ClientDB::new(clients_path, ro_clients_path)?,
             groups: GroupDB::new(groups_path)?,
             users: UserDB::new(users_path)?,
         })
