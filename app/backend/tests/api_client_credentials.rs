@@ -3,6 +3,7 @@ mod common;
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use http::Request;
+use std::ops::Add;
 
 fn json_body(json: &str) -> axum::body::Body {
     axum::body::Body::from(json.to_string())
@@ -166,4 +167,142 @@ async fn test_client_credentials_token_has_correct_claims() {
     let aud = claims["aud"].as_array().unwrap();
     assert!(aud.iter().any(|a| a == "flecs-core-api"));
     assert!(aud.iter().any(|a| a == "fence-api"));
+}
+
+/// Create a client with Fence-generated certificate and return (client_id, private_key_pem).
+async fn create_cert_client(app: &common::TestApp, token: &str, name: &str) -> (String, String) {
+    let req = Request::put("/clients")
+        .header("content-type", "application/json")
+        .header("authorization", format!("Bearer {token}"))
+        .body(json_body(&format!(
+            r#"{{"name": "{name}", "auth_method": {{"type": "Certificate"}}, "groups": ["tech.flecs.admin"]}}"#
+        )))
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::CREATED, "body: {body}");
+    let resp: serde_json::Value = serde_json::from_str(&body).unwrap();
+    let id = resp["id"].as_str().unwrap().to_string();
+    let key = resp["private_key"].as_str().unwrap().to_string();
+    (id, key)
+}
+
+/// Sign a JWT assertion for client_credentials certificate auth.
+fn sign_assertion(client_id: &str, private_key_pem: &str) -> String {
+    let key = jsonwebtoken::EncodingKey::from_rsa_pem(private_key_pem.as_bytes()).unwrap();
+    let now = chrono::Utc::now();
+    let claims = serde_json::json!({
+        "iss": client_id,
+        "sub": client_id,
+        "aud": ["flecs-core-api", "fence-api"],
+        "exp": now.add(chrono::Duration::minutes(5)).timestamp(),
+        "iat": now.timestamp(),
+    });
+    jsonwebtoken::encode(
+        &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::RS256),
+        &claims,
+        &key,
+    )
+    .unwrap()
+}
+
+#[tokio::test]
+async fn test_client_credentials_certificate_flow() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+    let (client_id, private_key) = create_cert_client(&app, &token, "cert-svc").await;
+
+    let assertion = sign_assertion(&client_id, &private_key);
+    let form = format!(
+        "grant_type=client_credentials&client_id={client_id}&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={assertion}"
+    );
+    let req = Request::post("/oauth/token")
+        .header("content-type", "application/x-www-form-urlencoded")
+        .body(form_body(&form))
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::OK, "body: {body}");
+
+    let resp: serde_json::Value = serde_json::from_str(&body).unwrap();
+    assert!(resp["access_token"].is_string());
+    assert_eq!(resp["token_type"], "Bearer");
+    assert_eq!(resp["expires_in"], 600);
+}
+
+#[tokio::test]
+async fn test_client_credentials_certificate_wrong_key() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+    let (client_id, _) = create_cert_client(&app, &token, "cert-wrong-key").await;
+
+    // Generate a different key to sign with
+    let wrong_key = openssl::rsa::Rsa::generate(2048).unwrap();
+    let wrong_pem = String::from_utf8(
+        openssl::pkey::PKey::from_rsa(wrong_key)
+            .unwrap()
+            .private_key_to_pem_pkcs8()
+            .unwrap(),
+    )
+    .unwrap();
+    let assertion = sign_assertion(&client_id, &wrong_pem);
+
+    let form = format!(
+        "grant_type=client_credentials&client_id={client_id}&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={assertion}"
+    );
+    let req = Request::post("/oauth/token")
+        .header("content-type", "application/x-www-form-urlencoded")
+        .body(form_body(&form))
+        .unwrap();
+    let (status, _) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn test_client_credentials_certificate_wrong_sub() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+    let (client_id, private_key) = create_cert_client(&app, &token, "cert-wrong-sub").await;
+
+    // Sign assertion with wrong sub
+    let key = jsonwebtoken::EncodingKey::from_rsa_pem(private_key.as_bytes()).unwrap();
+    let now = chrono::Utc::now();
+    let claims = serde_json::json!({
+        "iss": client_id,
+        "sub": "00000000-0000-0000-0000-000000000000",
+        "aud": ["flecs-core-api", "fence-api"],
+        "exp": now.add(chrono::Duration::minutes(5)).timestamp(),
+        "iat": now.timestamp(),
+    });
+    let assertion = jsonwebtoken::encode(
+        &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::RS256),
+        &claims,
+        &key,
+    )
+    .unwrap();
+
+    let form = format!(
+        "grant_type=client_credentials&client_id={client_id}&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion={assertion}"
+    );
+    let req = Request::post("/oauth/token")
+        .header("content-type", "application/x-www-form-urlencoded")
+        .body(form_body(&form))
+        .unwrap();
+    let (status, _) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn test_client_credentials_certificate_missing_assertion() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+    let (client_id, _) = create_cert_client(&app, &token, "cert-no-assertion").await;
+
+    let form = format!(
+        "grant_type=client_credentials&client_id={client_id}&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer"
+    );
+    let req = Request::post("/oauth/token")
+        .header("content-type", "application/x-www-form-urlencoded")
+        .body(form_body(&form))
+        .unwrap();
+    let (status, _) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::BAD_REQUEST);
 }
