@@ -27,6 +27,8 @@ impl AppState {
             persist::Db::new(
                 config.database.users_path.clone(),
                 config.database.groups_path.clone(),
+                config.database.clients_path.clone(),
+                config.database.ro_clients_path.clone(),
             )
             .unwrap(),
         ));
