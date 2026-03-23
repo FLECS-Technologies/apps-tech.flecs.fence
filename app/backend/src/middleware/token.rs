@@ -51,8 +51,8 @@ pub async fn middleware(
             }
             Ok((roles, subject)) => {
                 debug!(
-                    "Successfully verified token of uid {}, roles: {:?}",
-                    subject.0, roles.0
+                    "Successfully verified token of {}, roles: {:?}",
+                    subject, roles.0
                 );
                 request.extensions_mut().insert(roles);
                 request.extensions_mut().insert(subject);

@@ -24,7 +24,7 @@ pub async fn patch(
     subject: Option<Extension<Subject>>,
     Json(update): Json<UpdateUser>,
 ) -> Response {
-    let Some(Extension(Subject(uid))) = subject else {
+    let Some(Extension(Subject::User(uid))) = subject else {
         return StatusCode::UNAUTHORIZED.into_response();
     };
     let mut db = state.db.lock().unwrap();
@@ -61,7 +61,7 @@ pub async fn delete(
     State(state): State<state::AppState>,
     subject: Option<Extension<Subject>>,
 ) -> Response {
-    let Some(Extension(Subject(uid))) = subject else {
+    let Some(Extension(Subject::User(uid))) = subject else {
         return StatusCode::UNAUTHORIZED.into_response();
     };
     let mut db = state.db.lock().unwrap();
