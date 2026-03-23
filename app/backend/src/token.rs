@@ -4,6 +4,7 @@ use oxide_auth::primitives::grant::Grant;
 use oxide_auth::primitives::issuer::{IssuedToken, TokenType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use std::fmt;
 use std::ops::Add;
 use std::sync::{Arc, Mutex};
 use thiserror::Error;
@@ -12,12 +13,25 @@ use crate::model::user::UserId;
 use crate::persist;
 
 const TOKEN_DURATION: chrono::Duration = chrono::Duration::days(1);
+const CLIENT_TOKEN_DURATION: chrono::Duration = chrono::Duration::minutes(10);
 
 #[derive(Debug, Clone, Default)]
 pub struct Roles(pub HashSet<String>);
 
 #[derive(Debug, Clone)]
-pub struct Subject(pub UserId);
+pub enum Subject {
+    User(UserId),
+    Client(uuid::Uuid),
+}
+
+impl fmt::Display for Subject {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Subject::User(uid) => write!(f, "user:{uid}"),
+            Subject::Client(cid) => write!(f, "client:{cid}"),
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct RealmAccess {
@@ -33,9 +47,12 @@ struct Claims {
     sub: String,
     exp: u64,
     iss: url::Url,
-    email: String,
+    token_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    email: Option<String>,
     aud: Vec<String>,
-    preferred_username: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    preferred_username: Option<String>,
     realm_access: RealmAccess,
     resource_access: ResourceAccess,
 }
@@ -65,9 +82,51 @@ pub fn issue(
         sub: grant.owner_id,
         exp: until.timestamp() as u64,
         iss: issuer,
-        email: "test@flecs.local".to_string(),
+        token_type: "user".to_string(),
+        email: Some("test@flecs.local".to_string()),
         aud: vec!["flecs-core-api".to_string(), "fence-api".to_string()],
-        preferred_username: user.name.clone(),
+        preferred_username: Some(user.name.clone()),
+        realm_access: RealmAccess {
+            roles: roles.clone(),
+        },
+        resource_access: ResourceAccess {
+            account: Account { roles },
+        },
+    };
+
+    let token = jsonwebtoken::encode(
+        &jsonwebtoken::Header {
+            kid,
+            alg: Algorithm::RS256,
+            ..jsonwebtoken::Header::default()
+        },
+        &claims,
+        encoding_key,
+    )?;
+    Ok(IssuedToken {
+        token,
+        refresh: None,
+        until,
+        token_type: TokenType::Bearer,
+    })
+}
+
+pub fn issue_client_token(
+    client_id: uuid::Uuid,
+    roles: Vec<String>,
+    issuer: url::Url,
+    kid: Option<String>,
+    encoding_key: &EncodingKey,
+) -> Result<IssuedToken, anyhow::Error> {
+    let until = chrono::Utc::now().add(CLIENT_TOKEN_DURATION);
+    let claims = Claims {
+        sub: client_id.to_string(),
+        exp: until.timestamp() as u64,
+        iss: issuer,
+        token_type: "client".to_string(),
+        email: None,
+        aud: vec!["flecs-core-api".to_string(), "fence-api".to_string()],
+        preferred_username: None,
         realm_access: RealmAccess {
             roles: roles.clone(),
         },
@@ -104,7 +163,7 @@ pub enum VerifyTokenError {
     #[error("Unknown kid '{0}'")]
     UnknownKid(String),
     #[error("Invalid subject: {0}")]
-    InvalidSubject(#[from] std::num::ParseIntError),
+    InvalidSubject(String),
     #[error(transparent)]
     JsonWebToken(#[from] jsonwebtoken::errors::Error),
 }
@@ -150,7 +209,26 @@ pub fn verify(
     validation.set_issuer(&[issuer_url.as_str()]);
     validation.set_required_spec_claims(&["exp", "aud", "iss", "sub"]);
     let claims = jsonwebtoken::decode::<Claims>(token, &decoding_key, &validation)?.claims;
-    let subject = Subject(claims.sub.parse::<UserId>()?);
+    let subject =
+        match claims.token_type.as_str() {
+            "user" => {
+                let uid = claims.sub.parse::<UserId>().map_err(|e| {
+                    VerifyTokenError::InvalidSubject(format!("invalid user id: {e}"))
+                })?;
+                Subject::User(uid)
+            }
+            "client" => {
+                let cid = claims.sub.parse::<uuid::Uuid>().map_err(|e| {
+                    VerifyTokenError::InvalidSubject(format!("invalid client id: {e}"))
+                })?;
+                Subject::Client(cid)
+            }
+            other => {
+                return Err(VerifyTokenError::InvalidSubject(format!(
+                    "unknown token_type: {other}"
+                )));
+            }
+        };
     let roles = Roles(
         claims
             .realm_access
