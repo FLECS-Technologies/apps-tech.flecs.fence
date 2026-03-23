@@ -22,8 +22,8 @@ where
             Ok(Some(axum_extra::headers::Authorization(bearer))) => {
                 Ok(AuthToken(Some(bearer.token().to_string())))
             }
-            Ok(None) => Ok(AuthToken(None)),
-            _ => Err(http::StatusCode::UNAUTHORIZED),
+            // No Authorization header, or not a Bearer token (e.g. Basic auth)
+            _ => Ok(AuthToken(None)),
         }
     }
 }
