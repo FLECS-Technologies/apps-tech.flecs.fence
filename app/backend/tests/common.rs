@@ -20,6 +20,12 @@ pub struct TestApp {
 #[allow(dead_code)]
 impl TestApp {
     pub async fn new() -> Self {
+        Self::new_with_setup(|_| {}).await
+    }
+
+    /// Create a TestApp with a setup closure that runs before the app starts.
+    /// The closure receives the tempdir path so it can pre-populate files.
+    pub async fn new_with_setup(setup: impl FnOnce(&std::path::Path)) -> Self {
         let tempdir = TempDir::new().unwrap();
 
         let casbin_source = format!(
@@ -30,6 +36,8 @@ impl TestApp {
         let policy_path = tempdir.path().join("casbin_policy.csv");
         std::fs::copy(format!("{casbin_source}/casbin_model.conf"), &model_path).unwrap();
         std::fs::copy(format!("{casbin_source}/casbin_policy.csv"), &policy_path).unwrap();
+
+        setup(tempdir.path());
 
         let config = Config {
             database: user_manager::config::Database {

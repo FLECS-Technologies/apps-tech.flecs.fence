@@ -40,6 +40,11 @@ pub fn build_router(state: AppState) -> Router {
             "/users/{uid}/roles/{role}",
             put(rest::users::uid::roles::role::put).delete(rest::users::uid::roles::role::delete),
         )
+        .route("/clients", get(rest::clients::get).put(rest::clients::put))
+        .route(
+            "/clients/{cid}",
+            get(rest::clients::cid::get).delete(rest::clients::cid::delete),
+        )
         .route("/oauth/authorize", get(rest::oauth::authorize::get))
         .route("/oauth/token", post(rest::oauth::token::post))
         .layer(
