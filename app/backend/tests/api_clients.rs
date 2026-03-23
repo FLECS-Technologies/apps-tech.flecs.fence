@@ -339,6 +339,120 @@ async fn test_create_client_name_conflicts_with_read_only() {
 }
 
 #[tokio::test]
+async fn test_create_client_with_generated_certificate() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+
+    let req = Request::put("/clients")
+        .header("content-type", "application/json")
+        .header("authorization", format!("Bearer {token}"))
+        .body(json_body(
+            r#"{"name": "cert-svc", "auth_method": {"type": "Certificate"}, "groups": []}"#,
+        ))
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::CREATED, "body: {body}");
+
+    let response: serde_json::Value = serde_json::from_str(&body).unwrap();
+    assert!(response["id"].is_string());
+    assert_eq!(response["name"], "cert-svc");
+    assert_eq!(response["auth_method"], "certificate");
+    assert!(response.get("secret").is_none());
+    // Fence-generated cert: both certificate and private_key must be present
+    let cert_pem = response["certificate"].as_str().unwrap();
+    let key_pem = response["private_key"].as_str().unwrap();
+    assert!(cert_pem.contains("BEGIN CERTIFICATE"));
+    assert!(key_pem.contains("BEGIN PRIVATE KEY"));
+
+    // Verify client exists in database
+    assert!(client_exists(&app, "cert-svc"));
+    assert_eq!(client_count(&app), 1);
+}
+
+#[tokio::test]
+async fn test_create_client_with_provided_certificate() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+
+    // Generate a valid self-signed cert to provide
+    let rsa = openssl::rsa::Rsa::generate(2048).unwrap();
+    let pkey = openssl::pkey::PKey::from_rsa(rsa).unwrap();
+    let mut name_builder = openssl::x509::X509NameBuilder::new().unwrap();
+    name_builder.append_entry_by_text("CN", "test").unwrap();
+    let name = name_builder.build();
+    let mut builder = openssl::x509::X509Builder::new().unwrap();
+    builder.set_version(2).unwrap();
+    builder.set_subject_name(&name).unwrap();
+    builder.set_issuer_name(&name).unwrap();
+    builder.set_pubkey(&pkey).unwrap();
+    builder
+        .set_not_before(openssl::asn1::Asn1Time::days_from_now(0).unwrap().as_ref())
+        .unwrap();
+    builder
+        .set_not_after(
+            openssl::asn1::Asn1Time::days_from_now(365)
+                .unwrap()
+                .as_ref(),
+        )
+        .unwrap();
+    builder
+        .sign(&pkey, openssl::hash::MessageDigest::sha256())
+        .unwrap();
+    let cert_pem = String::from_utf8(builder.build().to_pem().unwrap()).unwrap();
+
+    let body_json = serde_json::json!({
+        "name": "provided-cert-svc",
+        "auth_method": {"type": "Certificate", "pem": cert_pem},
+        "groups": []
+    });
+
+    let req = Request::put("/clients")
+        .header("content-type", "application/json")
+        .header("authorization", format!("Bearer {token}"))
+        .body(json_body(&body_json.to_string()))
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::CREATED, "body: {body}");
+
+    let response: serde_json::Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(response["name"], "provided-cert-svc");
+    assert_eq!(response["auth_method"], "certificate");
+    assert!(response.get("secret").is_none());
+    // Provided cert: no certificate or private_key in response
+    assert!(response.get("certificate").is_none());
+    assert!(response.get("private_key").is_none());
+
+    // Verify client exists in database
+    assert!(client_exists(&app, "provided-cert-svc"));
+    assert_eq!(client_count(&app), 1);
+}
+
+#[tokio::test]
+async fn test_create_client_with_invalid_certificate() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+
+    let body_json = serde_json::json!({
+        "name": "bad-cert-svc",
+        "auth_method": {"type": "Certificate", "pem": "not-a-valid-pem"},
+        "groups": []
+    });
+
+    let req = Request::put("/clients")
+        .header("content-type", "application/json")
+        .header("authorization", format!("Bearer {token}"))
+        .body(json_body(&body_json.to_string()))
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::BAD_REQUEST, "body: {body}");
+    assert!(body.contains("Invalid PEM certificate"));
+
+    // Verify no client was created in database
+    assert!(!client_exists(&app, "bad-cert-svc"));
+    assert_eq!(client_count(&app), 0);
+}
+
+#[tokio::test]
 async fn test_list_clients_requires_auth() {
     let app = common::TestApp::new().await;
     let req = Request::get("/clients")
