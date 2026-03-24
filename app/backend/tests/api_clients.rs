@@ -510,3 +510,29 @@ async fn test_create_client_with_caller_groups_succeeds() {
     assert!(group_names.contains("tech.flecs.developer"));
     assert_eq!(group_names.len(), 2);
 }
+
+#[tokio::test]
+async fn test_create_client_with_implicit_casbin_role_succeeds() {
+    let app = common::TestApp::new().await;
+    let token = setup_admin(&app).await;
+
+    // Admin has tech.flecs.admin in its token. Via Casbin policy, tech.flecs.admin
+    // -> tech.flecs.fence.admin -> tech.flecs.fence.update_user.
+    // The implicit role should be accepted even though it's not directly in the token.
+    let req = Request::put("/clients")
+        .header("content-type", "application/json")
+        .header("authorization", format!("Bearer {token}"))
+        .body(json_body(
+            r#"{"name": "casbin-client", "auth_method": {"type": "Secret"}, "groups": ["tech.flecs.fence.update_user"]}"#,
+        ))
+        .unwrap();
+    let (status, body) = app.request_body(req).await;
+    assert_eq!(status, http::StatusCode::CREATED, "body: {body}");
+
+    let db = app.state.db.lock().unwrap();
+    let client = db.clients.query_by_name("casbin-client").unwrap();
+    let group_names: std::collections::HashSet<&str> =
+        client.groups.iter().map(|g| g.as_ref()).collect();
+    assert!(group_names.contains("tech.flecs.fence.update_user"));
+    assert_eq!(group_names.len(), 1);
+}
