@@ -27,7 +27,7 @@ async fn main() {
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(DEFAULT_LOG_LEVEL));
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    let config = user_manager::config::Config::default();
+    let config = user_manager::config::Config::from_env().unwrap();
     let enforcer = state::construct_enforcer(
         config.auth.casbin_model_path.clone(),
         config.auth.casbin_policy_path.clone(),
