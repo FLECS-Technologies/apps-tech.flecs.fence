@@ -2,6 +2,8 @@ use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use rand_core::TryRngCore;
 
+use casbin::RbacApi;
+
 use crate::model::client::{
     AuthMethod, Client, ClientSummary, CreateAuthMethod, CreateClient, CreateClientResponse,
 };
@@ -45,10 +47,20 @@ pub async fn put(
     axum::Extension(Roles(caller_roles)): axum::Extension<Roles>,
     Json(create): Json<CreateClient>,
 ) -> Response {
+    let mut expanded_roles = caller_roles.clone();
+    {
+        let enforcer = state.enforcer.lock().unwrap();
+        for role in &caller_roles {
+            for implicit in enforcer.get_implicit_roles_for_user(role, None) {
+                expanded_roles.insert(implicit);
+            }
+        }
+    }
+
     let unauthorized_groups: Vec<_> = create
         .groups
         .iter()
-        .filter(|g| !caller_roles.contains(g.as_ref()))
+        .filter(|g| !expanded_roles.contains(g.as_ref()))
         .collect();
     if !unauthorized_groups.is_empty() {
         return (
