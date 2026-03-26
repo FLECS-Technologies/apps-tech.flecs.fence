@@ -1,0 +1,32 @@
+name: Pull Request
+run-name: "PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Build project
+        working-directory: ./app/backend
+        run: cargo build --all-targets --locked
+
+      - name: Validate code format
+        working-directory: ./app/backend
+        run: cargo fmt --check --all
+
+      - name: Lint rust code
+        working-directory: ./app/backend
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Run tests
+        working-directory: ./app/backend
+        run: |
+          cargo test --locked
+          cargo test --doc --locked
