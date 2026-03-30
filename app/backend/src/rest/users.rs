@@ -24,7 +24,7 @@ pub async fn get(State(state): State<state::AppState>) -> Json<Vec<UserSummary>>
 }
 
 #[utoipa::path(
-    put,
+    post,
     path="/users",
     responses(
         (status = CREATED, description = "User was created", body = user::UserId),
@@ -34,7 +34,7 @@ pub async fn get(State(state): State<state::AppState>) -> Json<Vec<UserSummary>>
     ),
     request_body(content = CreateUser)
 )]
-pub async fn put(State(state): State<state::AppState>, Json(user): Json<CreateUser>) -> Response {
+pub async fn post(State(state): State<state::AppState>, Json(user): Json<CreateUser>) -> Response {
     let mut db = state.db.lock().unwrap();
     let id = match db.users.insert(user) {
         Ok(id) => id,

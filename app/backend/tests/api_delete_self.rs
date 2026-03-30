@@ -44,7 +44,7 @@ async fn test_delete_self_success() {
     let admin_token = app.mint_token(0);
 
     // Create a regular user
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {admin_token}"))
         .body(json_body(&format!(

@@ -146,10 +146,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserSummary'
-    put:
+    post:
       tags:
       - rest::users
-      operationId: put
+      operationId: post
       requestBody:
         content:
           application/json:

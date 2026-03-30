@@ -24,7 +24,7 @@ async fn setup_with_admin(app: &common::TestApp) -> String {
 
 /// Helper: create a regular user and return its uid.
 async fn create_user(app: &common::TestApp, token: &str, name: &str) -> u16 {
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&format!(

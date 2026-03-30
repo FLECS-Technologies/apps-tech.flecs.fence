@@ -114,7 +114,7 @@ async fn test_get_users_with_auth() {
 #[tokio::test]
 async fn test_put_user_requires_auth() {
     let app = common::TestApp::new().await;
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .body(json_body(&format!(
             r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#
@@ -138,7 +138,7 @@ async fn test_put_user_with_auth() {
     let token = app.mint_token(0);
 
     // Create a new user
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&format!(
@@ -184,7 +184,7 @@ async fn test_put_user_duplicate_name() {
         format!(r#"{{"name": "testuser", "password": "{VALID_PASSWORD}", "groups": []}}"#);
 
     // Create user
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&user_json))
@@ -192,7 +192,7 @@ async fn test_put_user_duplicate_name() {
     app.request(req).await;
 
     // Create duplicate
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&user_json))
@@ -273,7 +273,7 @@ async fn test_delete_user() {
     let token = app.mint_token(0);
 
     // Create a user to delete
-    let req = Request::put("/users")
+    let req = Request::post("/users")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&format!(
