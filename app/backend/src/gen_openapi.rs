@@ -29,7 +29,7 @@ impl Modify for Security {
     modifiers(&Security),
     paths(
         rest::users::get,
-        rest::users::put,
+        rest::users::post,
         rest::users::uid::get,
         rest::users::uid::patch,
         rest::users::uid::delete,

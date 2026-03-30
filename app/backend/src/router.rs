@@ -17,7 +17,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/login", post(rest::login::post))
         .route("/meta/issuer", get(rest::meta::issuer::get))
         .route("/meta/jwk", get(rest::meta::jwk::get))
-        .route("/users", get(rest::users::get).put(rest::users::put))
+        .route("/users", get(rest::users::get).post(rest::users::post))
         .route(
             "/users/self",
             patch(rest::users::self_::patch).delete(rest::users::self_::delete),
