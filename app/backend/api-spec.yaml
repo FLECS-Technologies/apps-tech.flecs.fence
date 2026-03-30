@@ -46,6 +46,12 @@ paths:
             text/plain:
               schema:
                 type: string
+        '403':
+          description: Caller does not have all requested groups
+          content:
+            text/plain:
+              schema:
+                type: string
         '409':
           description: Client with that name already exists
         '500':
