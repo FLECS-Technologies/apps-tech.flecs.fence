@@ -30,7 +30,7 @@ async fn setup_admin(app: &common::TestApp) -> String {
 
 /// Create a client with secret auth and return (client_id, client_secret).
 async fn create_secret_client(app: &common::TestApp, token: &str, name: &str) -> (String, String) {
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&format!(
@@ -171,7 +171,7 @@ async fn test_client_credentials_token_has_correct_claims() {
 
 /// Create a client with Fence-generated certificate and return (client_id, private_key_pem).
 async fn create_cert_client(app: &common::TestApp, token: &str, name: &str) -> (String, String) {
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&format!(

@@ -38,7 +38,7 @@ async fn setup_admin(app: &common::TestApp) -> String {
 #[tokio::test]
 async fn test_create_client_requires_auth() {
     let app = common::TestApp::new().await;
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .body(json_body(
             r#"{"name": "svc", "auth_method": {"type": "Secret"}, "groups": []}"#,
@@ -54,7 +54,7 @@ async fn test_create_client_with_secret() {
     let app = common::TestApp::new().await;
     let token = setup_admin(&app).await;
 
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -86,7 +86,7 @@ async fn test_list_clients() {
 
     // Create two clients
     for name in ["svc-a", "svc-b"] {
-        let req = Request::put("/clients")
+        let req = Request::post("/clients")
             .header("content-type", "application/json")
             .header("authorization", format!("Bearer {token}"))
             .body(json_body(&format!(
@@ -124,7 +124,7 @@ async fn test_get_single_client() {
     let token = setup_admin(&app).await;
 
     // Create a client
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -172,7 +172,7 @@ async fn test_delete_client() {
     let token = setup_admin(&app).await;
 
     // Create
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -213,7 +213,7 @@ async fn test_duplicate_client_name() {
     let client_json = r#"{"name": "dup-svc", "auth_method": {"type": "Secret"}, "groups": []}"#;
 
     // First creation
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(client_json))
@@ -222,7 +222,7 @@ async fn test_duplicate_client_name() {
     assert_eq!(status, http::StatusCode::CREATED);
 
     // Duplicate
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(client_json))
@@ -324,7 +324,7 @@ async fn test_create_client_name_conflicts_with_read_only() {
     let token = setup_admin(&app).await;
 
     // Creating client with same name as read-only should return 409
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -343,7 +343,7 @@ async fn test_create_client_with_generated_certificate() {
     let app = common::TestApp::new().await;
     let token = setup_admin(&app).await;
 
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -406,7 +406,7 @@ async fn test_create_client_with_provided_certificate() {
         "groups": []
     });
 
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&body_json.to_string()))
@@ -438,7 +438,7 @@ async fn test_create_client_with_invalid_certificate() {
         "groups": []
     });
 
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(&body_json.to_string()))
@@ -469,7 +469,7 @@ async fn test_create_client_forbidden_when_assigning_groups_caller_does_not_have
 
     // Admin has tech.flecs.admin (+ inherited developer, technician, operator),
     // but does NOT have "custom.group".
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -491,7 +491,7 @@ async fn test_create_client_with_caller_groups_succeeds() {
     let token = setup_admin(&app).await;
 
     // Admin has tech.flecs.admin and inherited tech.flecs.developer — both should be allowed
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(
@@ -519,7 +519,7 @@ async fn test_create_client_with_implicit_casbin_role_succeeds() {
     // Admin has tech.flecs.admin in its token. Via Casbin policy, tech.flecs.admin
     // -> tech.flecs.fence.admin -> tech.flecs.fence.update_user.
     // The implicit role should be accepted even though it's not directly in the token.
-    let req = Request::put("/clients")
+    let req = Request::post("/clients")
         .header("content-type", "application/json")
         .header("authorization", format!("Bearer {token}"))
         .body(json_body(

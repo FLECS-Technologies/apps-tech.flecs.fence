@@ -44,7 +44,7 @@ impl Modify for Security {
         rest::meta::jwk::get,
         rest::meta::issuer::get,
         rest::clients::get,
-        rest::clients::put,
+        rest::clients::post,
         rest::clients::cid::get,
         rest::clients::cid::delete,
     ),

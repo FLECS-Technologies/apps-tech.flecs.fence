@@ -31,7 +31,7 @@ pub async fn get(State(state): State<state::AppState>) -> Json<Vec<ClientSummary
 }
 
 #[utoipa::path(
-    put,
+    post,
     path="/clients",
     responses(
         (status = CREATED, description = "Client was created", body = CreateClientResponse),
@@ -42,7 +42,7 @@ pub async fn get(State(state): State<state::AppState>) -> Json<Vec<ClientSummary
     ),
     request_body(content = CreateClient)
 )]
-pub async fn put(
+pub async fn post(
     State(state): State<state::AppState>,
     axum::Extension(Roles(caller_roles)): axum::Extension<Roles>,
     Json(create): Json<CreateClient>,
