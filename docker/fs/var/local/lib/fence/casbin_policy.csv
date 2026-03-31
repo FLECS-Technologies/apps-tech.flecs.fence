@@ -18,7 +18,7 @@ p,tech.flecs.fence.assign_roles,/users/:uid/roles/:role,DELETE
 p,*,/users/self,DELETE
 p,*,/users/self,PATCH
 p,tech.flecs.fence.update_user,/users/:uid,PATCH
-p,tech.flecs.fence.create_client,/clients,PUT
+p,tech.flecs.fence.create_client,/clients,POST
 p,tech.flecs.fence.list_clients,/clients,GET
 p,tech.flecs.fence.list_clients,/clients/:cid,GET
 p,tech.flecs.fence.delete_client,/clients/:cid,DELETE

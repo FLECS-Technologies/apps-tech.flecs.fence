@@ -23,10 +23,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ClientSummary'
-    put:
+    post:
       tags:
       - rest::clients
-      operationId: put
+      operationId: post
       requestBody:
         content:
           application/json:
