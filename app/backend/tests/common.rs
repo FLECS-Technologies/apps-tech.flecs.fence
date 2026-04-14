@@ -29,7 +29,7 @@ impl TestApp {
         let tempdir = TempDir::new().unwrap();
 
         let casbin_source = format!(
-            "{}/../../docker/fs/var/local/lib/fence",
+            "{}/../../docker/fs/usr/local/share/fence",
             env!("CARGO_MANIFEST_DIR")
         );
         let model_path = tempdir.path().join("casbin_model.conf");

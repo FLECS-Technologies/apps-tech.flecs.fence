@@ -38,11 +38,11 @@ fn default_issuer_url() -> url::Url {
 }
 
 fn default_casbin_model_path() -> PathBuf {
-    "/var/local/lib/fence/casbin_model.conf".into()
+    "/usr/local/share/fence/casbin_model.conf".into()
 }
 
 fn default_casbin_policy_path() -> PathBuf {
-    "/var/local/lib/fence/casbin_policy.csv".into()
+    "/usr/local/share/fence/casbin_policy.csv".into()
 }
 
 #[derive(Deserialize)]
