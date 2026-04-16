@@ -2,6 +2,8 @@ mod common;
 
 use http::Request;
 
+use base64::Engine;
+
 const VALID_PASSWORD: &str = "TestPassword123";
 
 fn super_admin_json() -> String {
@@ -86,6 +88,45 @@ async fn test_post_login_success() {
         set_cookie.contains("sid="),
         "Expected session cookie to be set"
     );
+}
+
+#[tokio::test]
+async fn test_admin_token_contains_legacy_core_roles() {
+    let app = common::TestApp::new().await;
+
+    // Create super admin (gets tech.flecs.admin)
+    let req = Request::post("/users/super-admin")
+        .header("content-type", "application/json")
+        .body(json_body(&super_admin_json()))
+        .unwrap();
+    app.request(req).await;
+
+    let token = app.mint_token(0);
+
+    // Decode JWT payload (second segment)
+    let payload = token.split('.').nth(1).unwrap();
+    let decoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
+        .decode(payload)
+        .unwrap();
+    let claims: serde_json::Value = serde_json::from_slice(&decoded).unwrap();
+    let roles: Vec<&str> = claims["realm_access"]["roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_str().unwrap())
+        .collect();
+
+    // General roles
+    assert!(roles.contains(&"tech.flecs.admin"));
+    assert!(roles.contains(&"tech.flecs.developer"));
+    assert!(roles.contains(&"tech.flecs.technician"));
+    assert!(roles.contains(&"tech.flecs.operator"));
+
+    // Legacy core roles
+    assert!(roles.contains(&"tech.flecs.core.admin"));
+    assert!(roles.contains(&"tech.flecs.core.developer"));
+    assert!(roles.contains(&"tech.flecs.core.technician"));
+    assert!(roles.contains(&"tech.flecs.core.operator"));
 }
 
 #[tokio::test]

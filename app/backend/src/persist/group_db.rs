@@ -174,6 +174,45 @@ mod tests {
     }
 
     #[test]
+    fn default_groups_admin_includes_all_core_roles() {
+        let db = GroupDB {
+            path: PathBuf::new(),
+            groups: super::default::default_groups(),
+        };
+        let result = db.query_groups_with_subgroups(&[GroupId::admin()]);
+        assert!(result.contains(&GroupId::core_admin()));
+        assert!(result.contains(&GroupId::core_developer()));
+        assert!(result.contains(&GroupId::core_technician()));
+        assert!(result.contains(&GroupId::core_operator()));
+    }
+
+    #[test]
+    fn default_groups_developer_includes_matching_core_roles() {
+        let db = GroupDB {
+            path: PathBuf::new(),
+            groups: super::default::default_groups(),
+        };
+        let result = db.query_groups_with_subgroups(&[GroupId::developer()]);
+        assert!(!result.contains(&GroupId::core_admin()));
+        assert!(result.contains(&GroupId::core_developer()));
+        assert!(result.contains(&GroupId::core_technician()));
+        assert!(result.contains(&GroupId::core_operator()));
+    }
+
+    #[test]
+    fn default_groups_operator_includes_only_core_operator() {
+        let db = GroupDB {
+            path: PathBuf::new(),
+            groups: super::default::default_groups(),
+        };
+        let result = db.query_groups_with_subgroups(&[GroupId::operator()]);
+        assert!(!result.contains(&GroupId::core_admin()));
+        assert!(!result.contains(&GroupId::core_developer()));
+        assert!(!result.contains(&GroupId::core_technician()));
+        assert!(result.contains(&GroupId::core_operator()));
+    }
+
+    #[test]
     fn unknown_subgroup_not_in_db_is_not_included() {
         let unknown = GroupId::from("unknown".to_string());
         let db = make_db(vec![make_group(GroupId::admin(), vec![unknown])]);
