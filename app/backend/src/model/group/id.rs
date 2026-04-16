@@ -32,6 +32,22 @@ impl GroupId {
     pub fn operator() -> Self {
         Self("tech.flecs.operator".to_string())
     }
+
+    pub fn core_admin() -> Self {
+        Self("tech.flecs.core.admin".to_string())
+    }
+
+    pub fn core_developer() -> Self {
+        Self("tech.flecs.core.developer".to_string())
+    }
+
+    pub fn core_technician() -> Self {
+        Self("tech.flecs.core.technician".to_string())
+    }
+
+    pub fn core_operator() -> Self {
+        Self("tech.flecs.core.operator".to_string())
+    }
 }
 
 impl From<String> for GroupId {
